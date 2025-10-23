@@ -232,7 +232,7 @@ const UsersPage = () => {
                                 <TableRow>
                                     <TableHead className="text-right">الاسم</TableHead>
                                     <TableHead className="text-right">رقم الهاتف</TableHead>
-                                    <TableHead className="text-right">رقم هاتف الوالد</TableHead>
+                                    <TableHead className="text-right">البريد الإلكتروني</TableHead>
                                     <TableHead className="text-right">الدور</TableHead>
                                     <TableHead className="text-right">تاريخ التسجيل</TableHead>
                                     <TableHead className="text-right">الإجراءات</TableHead>
@@ -412,7 +412,7 @@ const UsersPage = () => {
                                 <TableRow>
                                     <TableHead className="text-right">الاسم</TableHead>
                                     <TableHead className="text-right">رقم الهاتف</TableHead>
-                                    <TableHead className="text-right">رقم هاتف الوالد</TableHead>
+                                    <TableHead className="text-right">البريد الإلكتروني</TableHead>
                                     <TableHead className="text-right">الدور</TableHead>
                                     <TableHead className="text-right">الرصيد</TableHead>
                                     <TableHead className="text-right">الكورسات المشتراة</TableHead>
