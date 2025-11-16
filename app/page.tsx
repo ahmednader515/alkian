@@ -81,11 +81,32 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             className="max-w-4xl mx-auto"
           >
+            {/* Teacher image and titles */}
+            <div className="flex flex-col items-center justify-center mb-8">
+              <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-xl">
+                <Image
+                  src="/teacher-image.png"
+                  alt="Mr/ Mohamed khaled hassan"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+              <div className="mt-4 text-center">
+                <div className="text-white text-xl md:text-2xl font-semibold">
+                  Mr/ Mohamed khaled hassan
+                </div>
+                <div className="text-blue-100 text-sm md:text-base mt-1">
+                  عميد الكيآن اكاديمي للتأهيل والتدريب
+                </div>
+              </div>
+            </div>
+
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 text-white">
               مركز الكيان للتأهيل والتدريب
             </h1>
             <p className="text-xl md:text-2xl lg:text-3xl text-blue-100 mb-8">
-              جميع مجالات الطب التكميلي والتأهيل الرياضي
+              جميع مجالات الطب التكميلي  والتأهيل الرياضي والتمنية البشرية والعناية بالبشرة والشعر والاستشارات
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild className="bg-white text-[#052c4b] hover:bg-gray-100 text-lg px-8 py-4">

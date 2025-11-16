@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { AuthOptions } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
-import GoogleProvider from "next-auth/providers/google";
 import { Adapter } from "next-auth/adapters";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
@@ -25,14 +24,10 @@ export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(db) as Adapter,
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
-        login: { label: "Phone Number or Email", type: "text" },
+        login: { label: "Phone Number", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -40,13 +35,8 @@ export const authOptions: AuthOptions = {
           throw new Error("Missing credentials");
         }
 
-        // Check if login is email or phone number
-        const isEmail = credentials.login.includes("@");
-        
         const user = await db.user.findUnique({
-          where: isEmail 
-            ? { email: credentials.login }
-            : { phoneNumber: credentials.login },
+          where: { phoneNumber: credentials.login },
         });
 
         if (!user || !user.hashedPassword) {
@@ -66,7 +56,6 @@ export const authOptions: AuthOptions = {
           id: user.id,
           name: user.fullName,
           phoneNumber: user.phoneNumber,
-          email: user.email,
           role: user.role,
         } as any;
       },
@@ -90,7 +79,6 @@ export const authOptions: AuthOptions = {
         session.user.id = token.id;
         session.user.name = token.name;
         session.user.phoneNumber = token.phoneNumber;
-        session.user.email = token.email;
         session.user.image = token.picture ?? undefined;
         session.user.role = token.role;
       }
@@ -105,7 +93,6 @@ export const authOptions: AuthOptions = {
           id: user.id,
           name: user.name,
           phoneNumber: user.phoneNumber,
-          email: user.email,
           picture: (user as any).picture,
           role: user.role,
         };

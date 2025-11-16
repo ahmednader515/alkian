@@ -14,7 +14,6 @@ model User {
   id                      String    @id @default(uuid())
   fullName                String
   phoneNumber             String    @unique
-  email                   String    @unique
   hashedPassword          String?
   image                   String?
   role                    String    @default("USER")

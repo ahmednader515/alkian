@@ -17,9 +17,9 @@ export async function POST(req: Request) {
       return new NextResponse("Forbidden - Teacher access required", { status: 403 });
     }
 
-    const { fullName, phoneNumber, email, password, confirmPassword } = await req.json();
+    const { fullName, phoneNumber, password, confirmPassword } = await req.json();
 
-    if (!fullName || !phoneNumber || !email || !password || !confirmPassword) {
+    if (!fullName || !phoneNumber || !password || !confirmPassword) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
@@ -27,27 +27,16 @@ export async function POST(req: Request) {
       return new NextResponse("Passwords do not match", { status: 400 });
     }
 
-    // Check if phone number is the same as email
-    if (phoneNumber === email) {
-      return new NextResponse("Phone number cannot be the same as email", { status: 400 });
-    }
-
     // Check if user already exists
     const existingUser = await db.user.findFirst({
       where: {
-        OR: [
-          { phoneNumber },
-          { email }
-        ]
+        phoneNumber
       },
     });
 
     if (existingUser) {
       if (existingUser.phoneNumber === phoneNumber) {
         return new NextResponse("Phone number already exists", { status: 400 });
-      }
-      if (existingUser.email === email) {
-        return new NextResponse("Email already exists", { status: 400 });
       }
     }
 
@@ -59,7 +48,6 @@ export async function POST(req: Request) {
       data: {
         fullName,
         phoneNumber,
-        email,
         hashedPassword,
         role: "USER", // Always create as student
       },

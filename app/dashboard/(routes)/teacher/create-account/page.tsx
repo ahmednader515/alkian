@@ -27,7 +27,6 @@ export default function CreateAccountPage() {
   const [formData, setFormData] = useState({
     fullName: "",
     phoneNumber: "",
-    email: "",
     password: "",
     confirmPassword: "",
   });
@@ -66,13 +65,7 @@ export default function CreateAccountPage() {
         setCreatedUser(response.data.user);
         toast.success("تم إنشاء حساب الطالب بنجاح");
         // Reset form
-        setFormData({
-          fullName: "",
-          phoneNumber: "",
-          email: "",
-          password: "",
-          confirmPassword: "",
-        });
+        setFormData({ fullName: "", phoneNumber: "", password: "", confirmPassword: "" });
       }
     } catch (error) {
       const axiosError = error as AxiosError;
@@ -80,10 +73,6 @@ export default function CreateAccountPage() {
         const errorMessage = axiosError.response.data as string;
         if (errorMessage.includes("Phone number already exists")) {
           toast.error("رقم الهاتف مسجل مسبقاً");
-        } else if (errorMessage.includes("Email already exists")) {
-          toast.error("البريد الإلكتروني مسجل مسبقاً");
-        } else if (errorMessage.includes("Phone number cannot be the same as email")) {
-          toast.error("رقم الهاتف لا يمكن أن يكون نفس البريد الإلكتروني");
         } else if (errorMessage.includes("Passwords do not match")) {
           toast.error("كلمات المرور غير متطابقة");
         } else {
@@ -98,13 +87,7 @@ export default function CreateAccountPage() {
   };
 
   const resetForm = () => {
-    setFormData({
-      fullName: "",
-      phoneNumber: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    });
+    setFormData({ fullName: "", phoneNumber: "", password: "", confirmPassword: "" });
     setCreatedUser(null);
   };
 
@@ -194,18 +177,7 @@ export default function CreateAccountPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">البريد الإلكتروني *</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="أدخل البريد الإلكتروني"
-                    required
-                  />
-                </div>
+                
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useSession, signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
+import { getDashboardUrlByRole } from "@/lib/utils";
 
 export const Navbar = () => {
   const { data: session } = useSession();
@@ -12,6 +13,9 @@ export const Navbar = () => {
   const handleLogout = () => {
     signOut({ callbackUrl: "/" });
   };
+
+  const dashboardHref =
+    session?.user?.role ? getDashboardUrlByRole(session.user.role) : "/dashboard";
 
   return (
     <div className="fixed top-0 w-full z-50 bg-white shadow-sm">
@@ -53,7 +57,7 @@ export const Navbar = () => {
             ) : (
               <>
                 <Button variant="ghost" asChild>
-                  <Link href="/dashboard">لوحة التحكم</Link>
+                  <Link href={dashboardHref}>لوحة التحكم</Link>
                 </Button>
                 <Button 
                   size="sm" 

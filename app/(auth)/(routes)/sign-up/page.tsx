@@ -19,12 +19,12 @@ export default function SignUpPage() {
   const [formData, setFormData] = useState({
     fullName: "",
     phoneNumber: "",
-    email: "",
+    accountType: "trainee",
     password: "",
     confirmPassword: "",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -159,19 +159,18 @@ export default function SignUpPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
+              <Label htmlFor="accountType">نوع الحساب</Label>
+              <select
+                id="accountType"
+                name="accountType"
                 disabled={isLoading}
-                className="h-10"
-                value={formData.email}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={formData.accountType}
                 onChange={handleInputChange}
-                placeholder="example@email.com"
-              />
+              >
+                <option value="trainee">متدرب</option>
+                <option value="guest">زائر</option>
+              </select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">كلمة المرور</Label>

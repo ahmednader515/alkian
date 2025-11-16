@@ -43,7 +43,7 @@ export default function SignInPage() {
 
       if (result?.error) {
         if (result.error === "CredentialsSignin") {
-          toast.error("رقم الهاتف أو البريد الإلكتروني أو كلمة المرور غير صحيحة");
+          toast.error("رقم الهاتف أو كلمة المرور غير صحيحة");
         } else {
           toast.error("حدث خطأ أثناء تسجيل الدخول");
         }
@@ -116,12 +116,12 @@ export default function SignInPage() {
               تسجيل الدخول
             </h2>
             <p className="text-sm text-muted-foreground">
-              أدخل رقم هاتفك أو بريدك الإلكتروني وكلمة المرور للدخول إلى حسابك
+              أدخل رقم هاتفك وكلمة المرور للدخول إلى حسابك
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="login">رقم الهاتف أو البريد الإلكتروني</Label>
+              <Label htmlFor="login">رقم الهاتف</Label>
               <Input
                 id="login"
                 name="login"
@@ -132,7 +132,7 @@ export default function SignInPage() {
                 className="h-10"
                 value={formData.login}
                 onChange={handleInputChange}
-                placeholder="+20XXXXXXXXXX أو example@email.com"
+                placeholder="+20XXXXXXXXXX"
               />
             </div>
             <div className="space-y-2">

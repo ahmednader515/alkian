@@ -135,6 +135,9 @@ export function getDashboardUrlByRole(role: string): string {
   
   let dashboardUrl: string;
   switch (role) {
+    case "GUEST":
+      dashboardUrl = "/dashboard/guest";
+      break;
     case "TEACHER":
       dashboardUrl = "/dashboard/teacher/courses";
       break;

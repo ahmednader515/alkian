@@ -18,7 +18,7 @@ export async function PATCH(
             return new NextResponse("Forbidden", { status: 403 });
         }
 
-        const { fullName, phoneNumber, email, role } = await req.json();
+        const { fullName, phoneNumber, role } = await req.json();
 
         // Check if user exists
         const existingUser = await db.user.findUnique({
@@ -44,22 +44,6 @@ export async function PATCH(
             }
         }
 
-        // Check if email is already taken by another user
-        if (email && email !== existingUser.email) {
-            const emailExists = await db.user.findFirst({
-                where: {
-                    email: email,
-                    id: {
-                        not: params.userId
-                    }
-                }
-            });
-
-            if (emailExists) {
-                return new NextResponse("Email already exists", { status: 400 });
-            }
-        }
-
         // Update user
         const updatedUser = await db.user.update({
             where: {
@@ -68,7 +52,6 @@ export async function PATCH(
             data: {
                 ...(fullName && { fullName }),
                 ...(phoneNumber && { phoneNumber }),
-                ...(email && { email }),
                 ...(role && { role })
             }
         });

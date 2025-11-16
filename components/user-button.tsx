@@ -23,7 +23,7 @@ export const UserButton = () => {
         <Avatar>
           <AvatarImage src={session.user.image || ""} />
           <AvatarFallback>
-            {session.user.name?.charAt(0) || session.user.email?.charAt(0)}
+            {session.user.name?.charAt(0) || session.user.phoneNumber?.charAt(0) || "U"}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>

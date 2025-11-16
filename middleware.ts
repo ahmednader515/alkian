@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 // Helper function to get dashboard URL by role
 function getDashboardUrlByRole(role: string): string {
   switch (role) {
+    case "GUEST":
+      return "/dashboard/guest";
     case "TEACHER":
       return "/dashboard/teacher/courses";
     case "ADMIN":
@@ -18,6 +20,7 @@ export default withAuth(
   function middleware(req) {
     const isTeacherRoute = req.nextUrl.pathname.startsWith("/dashboard/teacher");
     const isTeacher = req.nextauth.token?.role === "TEACHER";
+    const isGuest = req.nextauth.token?.role === "GUEST";
     const isAuthPage = req.nextUrl.pathname.startsWith("/sign-in") || 
                       req.nextUrl.pathname.startsWith("/sign-up") ||
                       req.nextUrl.pathname.startsWith("/forgot-password") ||
@@ -37,6 +40,14 @@ export default withAuth(
     // But exclude payment status page from this check
     if (!req.nextauth.token && !isAuthPage && !isPaymentStatusPage) {
       return NextResponse.redirect(new URL("/sign-in", req.url), { status: 302 });
+    }
+
+    // Restrict guests: allow only homepage and guest dashboard (APIs are excluded by matcher)
+    if (req.nextauth.token && isGuest) {
+      const path = req.nextUrl.pathname;
+      if (!(path === "/" || path.startsWith("/dashboard/guest"))) {
+        return NextResponse.redirect(new URL("/", req.url));
+      }
     }
 
     // Check for admin routes
