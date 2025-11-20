@@ -139,10 +139,10 @@ export function getDashboardUrlByRole(role: string): string {
       dashboardUrl = "/dashboard/guest";
       break;
     case "TEACHER":
-      dashboardUrl = "/dashboard/teacher/courses";
+      dashboardUrl = "/dashboard/teacher";
       break;
     case "ADMIN":
-      dashboardUrl = "/dashboard/admin/users";
+      dashboardUrl = "/dashboard/admin";
       break;
     case "USER":
     default:

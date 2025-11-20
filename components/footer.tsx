@@ -18,8 +18,13 @@ const TikTokIcon = ({ className }: { className?: string }) => (
 export const Footer = () => {
   const pathname = usePathname();
   
+  // Hide footer on dashboard pages
+  if (pathname?.startsWith('/dashboard')) {
+    return null;
+  }
+  
   // Check if we're on a page with a sidebar
-  const hasSidebar = pathname?.startsWith('/dashboard') || pathname?.startsWith('/courses');
+  const hasSidebar = pathname?.startsWith('/courses');
   
   return (
     <footer className="py-6 border-t">

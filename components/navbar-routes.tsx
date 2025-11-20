@@ -1,10 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button"
 import { LogOut } from "lucide-react";
-import Link from "next/link";
-import { UserButton } from "./user-button";
 import { useSession, signOut } from "next-auth/react";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { useState } from "react";
@@ -40,8 +36,6 @@ export const NavbarRoutes = () => {
                     تسجيل الخروج
                 </LoadingButton>
             )}
-            
-            <UserButton />
         </div>
     )
 }

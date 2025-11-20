@@ -4,6 +4,7 @@ import localFont from 'next/font/local';
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Footer } from "@/components/footer";
+import { PageLoader } from "@/components/page-loader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,6 +37,7 @@ export default function RootLayout({
     <html suppressHydrationWarning lang="ar" dir="rtl" className={`${geistSans.variable} ${geistMono.variable} ${playpenSansArabic.variable}`}>
       <body suppressHydrationWarning className="font-playpen-sans-arabic">
         <Providers>
+          <PageLoader />
           <div className="min-h-screen flex flex-col">
             <main className="flex-1">
               {children}

@@ -1,20 +1,27 @@
-"use client";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/lib/auth";
+import { AdminMainServices } from "../../_components/admin-main-services";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+const AdminDashboardPage = async () => {
+    const session = await getServerSession(authOptions);
 
-export default function AdminRedirect() {
-    const router = useRouter();
+    if (!session?.user?.id) {
+        return redirect("/");
+    }
 
-    useEffect(() => {
-        router.replace("/dashboard/admin/users");
-    }, [router]);
+    if (session.user.role !== "ADMIN") {
+        if (session.user.role === "TEACHER") {
+            return redirect("/dashboard/teacher");
+        }
+        return redirect("/dashboard");
+    }
 
     return (
-        <div className="h-full flex items-center justify-center">
-            <div className="text-center">
-                <div className="text-lg">جاري التوجيه...</div>
-            </div>
+        <div>
+            <AdminMainServices />
         </div>
     );
-} 
+};
+
+export default AdminDashboardPage;
