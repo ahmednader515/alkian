@@ -1,5 +1,5 @@
 "use client";
-import { Navbar } from "./_components/navbar";
+import { usePathname } from "next/navigation";
 import { DashboardBanner } from "./_components/dashboard-banner";
 import { BottomNav } from "./_components/bottom-nav";
 
@@ -8,13 +8,13 @@ const DashboardLayout = ({
 }: {
     children: React.ReactNode;
 }) => {
+    const pathname = usePathname();
+    const isGuestPage = pathname?.startsWith("/dashboard/guest");
+    
     return ( 
         <div className="min-h-screen flex flex-col dashboard-layout">
-            <div className="h-[80px] fixed inset-x-0 top-0 w-full z-50">
-                <Navbar />
-            </div>
-            <main className="pt-[80px] pb-16 flex-1">
-                <DashboardBanner />
+            <main className="pb-16 flex-1">
+                {!isGuestPage && <DashboardBanner />}
                 {children}
             </main>
             <BottomNav />

@@ -7,21 +7,18 @@ import { cn } from "@/lib/utils";
 const services = [
     {
         icon: BookOpen,
-        label: "تسجيل دورة تدريبة",
+        label: "الكورسات",
         href: "/dashboard/search",
-        color: "bg-green-500 hover:bg-green-600"
     },
     {
         icon: Wallet,
         label: "الرصيد",
         href: "/dashboard/balance",
-        color: "bg-blue-500 hover:bg-blue-600"
     },
     {
         icon: GraduationCap,
         label: "الشهادات",
         href: "/dashboard/certificates",
-        color: "bg-purple-500 hover:bg-purple-600"
     },
 ];
 
@@ -38,12 +35,13 @@ export const MainServices = () => {
                             key={index}
                             href={service.href}
                             className={cn(
-                                "flex flex-col items-center justify-center p-6 rounded-lg text-white transition-all duration-200 hover:scale-105 shadow-lg",
-                                service.color,
-                                isThirdButton ? "col-span-2 aspect-[2/1]" : "aspect-square"
+                                "flex flex-col items-center justify-center p-6 rounded-xl bg-white text-black transition-all duration-200 hover:scale-105 shadow-md border-2 border-gray-200 hover:border-gray-300 h-32",
+                                isThirdButton && "col-span-2"
                             )}
                         >
-                            <Icon className="h-8 w-8 mb-3" />
+                            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-50 mb-3">
+                                <Icon className="h-8 w-8 text-red-600" />
+                            </div>
                             <span className="text-sm font-medium text-center leading-tight">{service.label}</span>
                         </Link>
                     );
