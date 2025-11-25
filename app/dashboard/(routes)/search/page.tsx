@@ -4,10 +4,10 @@ import { db } from "@/lib/db";
 import { authOptions } from "@/lib/auth";
 import { SearchInput } from "./_components/search-input";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Clock, Users } from "lucide-react";
-import Image from "next/image";
+import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import { Course, Purchase } from "@prisma/client";
+import { cn } from "@/lib/utils";
 
 type CourseWithDetails = Course & {
     chapters: { id: string }[];
@@ -86,100 +86,18 @@ export default async function SearchPage({
 
     // Helper function to render course card
     const renderCourseCard = (course: CourseWithDetails) => (
-        <div
+        <Link
             key={course.id}
-            className="group bg-card rounded-2xl overflow-hidden border shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+            href={course.chapters.length > 0 ? `/courses/${course.id}/chapters/${course.chapters[0].id}` : `/courses/${course.id}`}
+            className={cn(
+                "flex flex-col items-center justify-center p-6 rounded-xl bg-white text-black transition-all duration-200 hover:scale-105 shadow-md border-2 border-gray-200 hover:border-gray-300 h-32"
+            )}
         >
-            <div className="relative w-full aspect-[16/9]">
-                <Image
-                    src={course.imageUrl || "/placeholder.png"}
-                    alt={course.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                
-                {/* Course Status Badge */}
-                <div className="absolute top-4 right-4">
-                    <div className={`rounded-full px-3 py-1 text-sm font-medium ${
-                        course.purchases.length > 0 
-                            ? "bg-green-500 text-white" 
-                            : "bg-white/90 backdrop-blur-sm text-gray-800"
-                    }`}>
-                        {course.purchases.length > 0 ? "مشترك" : "متاح"}
-                    </div>
-                </div>
-
-                {/* Price Badge */}
-                <div className="absolute top-4 left-4">
-                    <div className={`rounded-full px-3 py-1 text-sm font-medium ${
-                        course.price === 0 
-                            ? "bg-green-500 text-white" 
-                            : "bg-white/90 backdrop-blur-sm text-gray-800"
-                    }`}>
-                        {course.price === 0 ? "مجاني" : `${course.price} جنيه`}
-                    </div>
-                </div>
-
-                {/* Progress Bar for Purchased Courses */}
-                {course.purchases.length > 0 && course.progress > 0 && (
-                    <div className="absolute bottom-0 left-0 right-0 h-2 bg-black/30">
-                        <div 
-                            className="h-full bg-green-500 transition-all duration-300"
-                            style={{ width: `${course.progress}%` }}
-                        />
-                    </div>
-                )}
+            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-50 mb-3">
+                <BookOpen className="h-8 w-8 text-red-600" />
             </div>
-
-            <div className="p-6">
-                <div className="mb-4">
-                    <h3 className="text-xl font-bold mb-3 line-clamp-2 min-h-[3rem] text-gray-900">
-                        {course.title}
-                    </h3>
-                    
-                    {/* Course Stats */}
-                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center gap-1">
-                            <BookOpen className="h-4 w-4" />
-                            <span className="whitespace-nowrap">
-                                {course.chapters.length} {course.chapters.length === 1 ? "فصل" : "فصول"}
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <Users className="h-4 w-4" />
-                            <span className="whitespace-nowrap">{course.purchases.length} طالب</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            <span className="whitespace-nowrap">{new Date(course.updatedAt).toLocaleDateString('ar', {
-                                year: 'numeric',
-                                month: 'short'
-                            })}</span>
-                        </div>
-                    </div>
-
-                    {/* Progress Text for Purchased Courses */}
-                    {course.purchases.length > 0 && (
-                        <div className="mb-2">
-                            <span className="text-sm font-medium text-green-600">
-                                التقدم: {Math.round(course.progress)}%
-                            </span>
-                        </div>
-                    )}
-                </div>
-                
-                <Button 
-                    className="w-full bg-[#052c4b] hover:bg-[#052c4b]/90 text-white font-semibold py-3 text-base transition-all duration-200 hover:scale-105" 
-                    variant="default"
-                    asChild
-                >
-                    <Link href={course.chapters.length > 0 ? `/courses/${course.id}/chapters/${course.chapters[0].id}` : `/courses/${course.id}`}>
-                        {course.purchases.length > 0 ? "متابعة التعلم" : "عرض الكورس"}
-                    </Link>
-                </Button>
-            </div>
-        </div>
+            <span className="text-sm font-medium text-center leading-tight line-clamp-2">{course.title}</span>
+        </Link>
     );
 
     return (
@@ -217,7 +135,7 @@ export default async function SearchPage({
 
                 {/* Course Grid */}
                 {purchasedCourses.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-2 gap-4 max-w-4xl mx-auto">
                         {purchasedCourses.map((course) => renderCourseCard(course))}
                     </div>
                 ) : (
@@ -253,7 +171,7 @@ export default async function SearchPage({
 
                 {/* Course Grid */}
                 {otherCourses.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-2 gap-4 max-w-4xl mx-auto">
                         {otherCourses.map((course) => renderCourseCard(course))}
                     </div>
                 ) : (

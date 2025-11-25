@@ -18,7 +18,7 @@ export const ourFileRouter = {
     courseAttachment: f(["text", "image", "video", "audio", "pdf"])
     .middleware(() => handleAuth())
     .onUploadComplete(async ({ file }) => {
-        return { url: file.url, name: file.name };
+        return { url: file.ufsUrl, name: file.name };
     }),
 
     chapterVideo: f({ video: {maxFileCount: 1, maxFileSize: "512GB"} })
@@ -28,7 +28,7 @@ export const ourFileRouter = {
     certificate: f(["image", "pdf"])
     .middleware(() => handleAuth())
     .onUploadComplete(async ({ file }) => {
-        return { url: file.url, name: file.name };
+        return { url: file.ufsUrl, name: file.name };
     }),
 } satisfies FileRouter;
 
