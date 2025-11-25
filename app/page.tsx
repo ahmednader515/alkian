@@ -86,7 +86,7 @@ export default function HomePage() {
               <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-xl">
                 <Image
                   src="/teacher-image.png"
-                  alt="Mr/ Mohamed khaled"
+                  alt="Mr/ Mohamed khaled hassan"
                   fill
                   className="object-cover"
                   priority
