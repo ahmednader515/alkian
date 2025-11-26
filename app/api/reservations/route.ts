@@ -76,14 +76,14 @@ export async function POST(req: NextRequest) {
       teacherId: teacher.id,
     };
 
-    // Add date/time for session types
+    // Add date/time - required field, so always set it
     if (preferredDate && preferredTime) {
       reservationData.preferredDate = new Date(preferredDate);
       reservationData.preferredTime = preferredTime;
-    } else if (sessionTypes.includes(reservationType)) {
-      // For session types, set a default date if not provided
+    } else {
+      // Set default date/time if not provided (for non-session types or missing input)
       reservationData.preferredDate = new Date();
-      reservationData.preferredTime = "09:00";
+      reservationData.preferredTime = preferredTime || "09:00";
     }
 
     // Add course ID for online course registration
@@ -131,8 +131,32 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "غير مصرح" }, { status: 403 });
     }
 
+    const { searchParams } = new URL(req.url);
+    const reservationType = searchParams.get("type");
+
+    // Build where clause - show all reservations to all teachers
+    // (since reservations are general requests, all teachers should see them)
+    let whereClause: any = {};
+    
+    if (reservationType) {
+      if (reservationType === "RENEWAL") {
+        // Renewal requests use GENERAL type with "طلب تجديد" in message
+        whereClause = {
+          reservationType: "GENERAL",
+          message: {
+            not: null,
+            contains: "طلب تجديد",
+          },
+        };
+      } else {
+        whereClause.reservationType = reservationType;
+      }
+    }
+    
+    console.log("Fetching reservations with where clause:", JSON.stringify(whereClause, null, 2));
+
     const reservations = await db.reservation.findMany({
-      where: { teacherId: session.user.id },
+      where: whereClause,
       include: {
         course: {
           select: {
@@ -143,7 +167,8 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ reservations });
+    console.log(`Found ${reservations.length} reservations`);
+    return NextResponse.json({ reservations: reservations || [] });
 
   } catch (error) {
     console.error("Error fetching reservations:", error);

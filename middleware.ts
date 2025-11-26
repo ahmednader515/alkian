@@ -12,7 +12,7 @@ function getDashboardUrlByRole(role: string): string {
       return "/dashboard/admin/users";
     case "USER":
     default:
-      return "/dashboard/search";
+      return "/dashboard";
   }
 }
 
@@ -42,6 +42,13 @@ export default withAuth(
       return NextResponse.redirect(new URL("/sign-in", req.url), { status: 302 });
     }
 
+    // Redirect authenticated users (except guests) from homepage to dashboard
+    if (req.nextUrl.pathname === "/" && req.nextauth.token && !isGuest) {
+      const userRole = req.nextauth.token?.role || "USER";
+      const dashboardUrl = getDashboardUrlByRole(userRole);
+      return NextResponse.redirect(new URL(dashboardUrl, req.url));
+    }
+
     // Restrict guests: allow only homepage and guest dashboard (APIs are excluded by matcher)
     if (req.nextauth.token && isGuest) {
       const path = req.nextUrl.pathname;
@@ -56,12 +63,12 @@ export default withAuth(
 
     // If user is not a teacher or admin but trying to access teacher routes
     if (isTeacherRoute && !(isTeacher || isAdmin)) {
-      return NextResponse.redirect(new URL("/dashboard/search", req.url));
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
     // If user is not an admin but trying to access admin routes
     if (isAdminRoute && !isAdmin) {
-      return NextResponse.redirect(new URL("/dashboard/search", req.url));
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
     // If user accesses main dashboard, redirect to role-specific dashboard

@@ -30,6 +30,12 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ file }) => {
         return { url: file.ufsUrl, name: file.name };
     }),
+
+    certificateTemplate: f({ image: {maxFileSize: "10MB", maxFileCount: 1} })
+    .middleware(() => handleAuth())
+    .onUploadComplete(async ({ file }) => {
+        return { url: file.ufsUrl, name: file.name };
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

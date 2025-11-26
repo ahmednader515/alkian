@@ -17,7 +17,9 @@ import {
     FileCheck,
     UserCircle,
     Newspaper,
-    Target
+    Target,
+    UserPlus,
+    RefreshCw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -106,6 +108,21 @@ const services = [
         icon: Shield,
         label: "إنشاء حساب طالب",
         href: "/dashboard/teacher/create-account",
+    },
+    {
+        icon: BookOpen,
+        label: "طلبات التسجيل في الكورسات",
+        href: "/dashboard/teacher/online-course-registrations",
+    },
+    {
+        icon: UserPlus,
+        label: "طلبات العضوية والوظيفة",
+        href: "/dashboard/teacher/membership-job-requests",
+    },
+    {
+        icon: RefreshCw,
+        label: "طلبات التجديد",
+        href: "/dashboard/teacher/renewal-requests",
     },
 ];
 

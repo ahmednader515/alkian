@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { reservationId: string } }
+  { params }: { params: Promise<{ reservationId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,6 +14,7 @@ export async function PATCH(
       return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
+    const resolvedParams = await params;
     const body = await req.json();
     const { status } = body;
 
@@ -24,11 +25,10 @@ export async function PATCH(
       );
     }
 
-    // Check if reservation exists and belongs to the teacher
-    const existingReservation = await db.reservation.findFirst({
+    // Check if reservation exists
+    const existingReservation = await db.reservation.findUnique({
       where: {
-        id: params.reservationId,
-        teacherId: session.user.id,
+        id: resolvedParams.reservationId,
       },
     });
 
@@ -41,7 +41,7 @@ export async function PATCH(
 
     // Update the reservation
     const updatedReservation = await db.reservation.update({
-      where: { id: params.reservationId },
+      where: { id: resolvedParams.reservationId },
       data: { status },
     });
 
@@ -61,7 +61,7 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { reservationId: string } }
+  { params }: { params: Promise<{ reservationId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -70,11 +70,12 @@ export async function DELETE(
       return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
-    // Check if reservation exists and belongs to the teacher
-    const existingReservation = await db.reservation.findFirst({
+    const resolvedParams = await params;
+
+    // Check if reservation exists
+    const existingReservation = await db.reservation.findUnique({
       where: {
-        id: params.reservationId,
-        teacherId: session.user.id,
+        id: resolvedParams.reservationId,
       },
     });
 
@@ -87,7 +88,7 @@ export async function DELETE(
 
     // Delete the reservation
     await db.reservation.delete({
-      where: { id: params.reservationId },
+      where: { id: resolvedParams.reservationId },
     });
 
     return NextResponse.json({

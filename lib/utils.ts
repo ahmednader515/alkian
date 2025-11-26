@@ -146,7 +146,7 @@ export function getDashboardUrlByRole(role: string): string {
       break;
     case "USER":
     default:
-      dashboardUrl = "/dashboard/search";
+      dashboardUrl = "/dashboard";
       break;
   }
   

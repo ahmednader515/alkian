@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
-import { Wallet, Plus, History, ArrowUpRight } from "lucide-react";
+import { Wallet, Plus, History, ArrowUpRight, MessageCircle, Phone } from "lucide-react";
 
 interface BalanceTransaction {
   id: string;
@@ -103,11 +103,11 @@ export default function BalancePage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold">إدارة الرصيد</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl md:text-2xl font-bold">إدارة الرصيد</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             {isStudent 
               ? "عرض رصيد حسابك وسجل المعاملات" 
               : "أضف رصيد إلى حسابك لشراء الكورسات"
@@ -128,11 +128,62 @@ export default function BalancePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold text-[#052c4b]">
+          <div className="text-2xl md:text-3xl font-bold text-[#052c4b]">
             {balance.toFixed(2)} جنيه
           </div>
         </CardContent>
       </Card>
+
+      {/* Add Balance Instructions - Only for students */}
+      {isStudent && (
+        <Card className="bg-blue-50 border-blue-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-blue-800 text-lg md:text-xl">
+              <Phone className="h-4 w-4 md:h-5 md:w-5" />
+              طريقة إضافة الرصيد
+            </CardTitle>
+            <CardDescription className="text-blue-700 text-sm md:text-base">
+              لإضافة رصيد إلى حسابك، يرجى اتباع الخطوات التالية:
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 md:space-y-4">
+            <div className="space-y-2">
+              <p className="text-xs md:text-sm font-medium text-blue-900">
+                1. أرسل المبلغ المطلوب عبر:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-xs md:text-sm text-blue-800 mr-2 md:mr-4">
+                <li>فودافون كاش (Vodafone Cash)</li>
+                <li>إنستاباي (Instapay)</li>
+              </ul>
+              <p className="text-base md:text-lg font-bold text-blue-900 mt-2 md:mt-3 break-all">
+                إلى الرقم: 01066504332
+              </p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-xs md:text-sm font-medium text-blue-900">
+                2. بعد إتمام التحويل:
+              </p>
+              <p className="text-xs md:text-sm text-blue-800">
+                أرسل صورة إيصال التحويل عبر واتساب إلى نفس الرقم
+              </p>
+            </div>
+            <Button
+              asChild
+              className="w-full bg-green-600 hover:bg-green-700 text-white text-sm md:text-base py-2 md:py-2.5"
+            >
+              <a
+                href="https://wa.me/201066504332"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2"
+              >
+                <MessageCircle className="h-4 w-4" />
+                فتح واتساب لإرسال الإيصال
+              </a>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Add Balance Section - Only for non-students */}
       {!isStudent && (
@@ -147,7 +198,7 @@ export default function BalancePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4">
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4">
               <Input
                 type="number"
                 placeholder="أدخل المبلغ"
@@ -160,7 +211,7 @@ export default function BalancePage() {
               <Button 
                 onClick={handleAddBalance}
                 disabled={isLoading}
-                className="bg-[#052c4b] hover:bg-[#052c4b]/90"
+                className="bg-[#052c4b] hover:bg-[#052c4b]/90 w-full md:w-auto"
               >
                 {isLoading ? "جاري الإضافة..." : "إضافة الرصيد"}
               </Button>
@@ -191,14 +242,14 @@ export default function BalancePage() {
               <p className="text-muted-foreground">لا توجد معاملات حتى الآن</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               {transactions.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between p-4 border rounded-lg"
+                  className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-3 md:p-4 border rounded-lg"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-full ${
+                  <div className="flex items-start md:items-center gap-3 flex-1 min-w-0">
+                    <div className={`p-2 rounded-full flex-shrink-0 ${
                       transaction.type === "DEPOSIT" 
                         ? "bg-green-100 text-green-600" 
                         : "bg-red-100 text-red-600"
@@ -209,24 +260,24 @@ export default function BalancePage() {
                         <ArrowUpRight className="h-4 w-4" />
                       )}
                     </div>
-                                         <div>
-                       <p className="font-medium">
-                         {transaction.description.includes("Added") && transaction.type === "DEPOSIT" 
-                           ? transaction.description.replace(/Added (\d+(?:\.\d+)?) EGP to balance/, "تم إضافة $1 جنيه إلى الرصيد")
-                           : transaction.description.includes("Purchased course:") && transaction.type === "PURCHASE"
-                           ? transaction.description.replace(/Purchased course: (.+)/, "تم شراء الكورس: $1")
-                           : transaction.description
-                         }
-                       </p>
-                       <p className="text-sm text-muted-foreground">
-                         {formatDate(transaction.createdAt)}
-                       </p>
-                       <p className="text-xs text-muted-foreground">
-                         {transaction.type === "DEPOSIT" ? "إيداع" : "شراء كورس"}
-                       </p>
-                     </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm md:text-base break-words">
+                        {transaction.description.includes("Added") && transaction.type === "DEPOSIT" 
+                          ? transaction.description.replace(/Added (\d+(?:\.\d+)?) EGP to balance/, "تم إضافة $1 جنيه إلى الرصيد")
+                          : transaction.description.includes("Purchased course:") && transaction.type === "PURCHASE"
+                          ? transaction.description.replace(/Purchased course: (.+)/, "تم شراء الكورس: $1")
+                          : transaction.description
+                        }
+                      </p>
+                      <p className="text-xs md:text-sm text-muted-foreground mt-1">
+                        {formatDate(transaction.createdAt)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {transaction.type === "DEPOSIT" ? "إيداع" : "شراء كورس"}
+                      </p>
+                    </div>
                   </div>
-                  <div className={`font-bold ${
+                  <div className={`font-bold text-lg md:text-xl flex-shrink-0 ${
                     transaction.type === "DEPOSIT" ? "text-green-600" : "text-red-600"
                   }`}>
                     {transaction.type === "DEPOSIT" ? "+" : "-"}

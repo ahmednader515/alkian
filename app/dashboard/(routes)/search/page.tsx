@@ -103,7 +103,7 @@ export default async function SearchPage({
             {/* All Courses Section */}
             <div className="space-y-4">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">
+                    <h2 className="text-xl md:text-2xl font-bold text-gray-900">
                         {title 
                             ? `نتائج البحث (${allCourses.length})` 
                             : `جميع الكورسات (${allCourses.length})`

@@ -1,7 +1,20 @@
 import { db } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getDashboardUrlByRole } from "@/lib/utils";
 import { HomePageClient } from "./_components/home-page-client";
 
 export default async function HomePage() {
+  // Check if user is authenticated
+  const session = await getServerSession(authOptions);
+  
+  // Redirect authenticated users (except guests) to dashboard
+  if (session?.user && session.user.role !== "GUEST") {
+    const dashboardUrl = getDashboardUrlByRole(session.user.role);
+    redirect(dashboardUrl);
+  }
+
   // Fetch published courses from database
   let courses = [];
   

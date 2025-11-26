@@ -29,6 +29,8 @@ model User {
   certificateDownloads    CertificateDownload[]
   reservations            Reservation[]
   contents                Content[]
+  certificateTemplates    CertificateTemplate[]
+  contentItems            ContentItem[]
 }
 
 model Course {
@@ -292,6 +294,36 @@ model Content {
     teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
     
     @@unique([teacherId, type])
+    @@index([teacherId])
+    @@index([type])
+}
+
+model CertificateTemplate {
+    id String @id @default(uuid())
+    title String? @db.Text
+    imageUrl String @db.Text
+    description String? @db.Text
+    teacherId String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    
+    @@index([teacherId])
+}
+
+model ContentItem {
+    id String @id @default(uuid())
+    type String // "ABOUT_US", "GENERAL_NEWS", "ABOUT_LECTURERS", "GOALS_ACHIEVEMENTS"
+    title String? @db.Text
+    content String @db.Text
+    imageUrl String? @db.Text
+    teacherId String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    
     @@index([teacherId])
     @@index([type])
 }

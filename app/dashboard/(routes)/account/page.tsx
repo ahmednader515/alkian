@@ -17,7 +17,7 @@ const AccountPage = async () => {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-red-600">حسابي</h1>
+      <h1 className="text-xl md:text-3xl font-bold mb-6 text-red-600">حسابي</h1>
       
       <Card className="mb-6">
         <CardHeader>
