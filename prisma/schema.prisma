@@ -28,6 +28,7 @@ model User {
   certificates            Certificate[]
   certificateDownloads    CertificateDownload[]
   reservations            Reservation[]
+  contents                Content[]
 }
 
 model Course {
@@ -45,6 +46,7 @@ model Course {
   chapters Chapter[]
   purchases Purchase[]
   quizzes Quiz[]
+  reservations Reservation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -258,16 +260,38 @@ model Reservation {
     studentName String
     studentPhone String
     studentEmail String?
+    governorate String? // المحافظة
     preferredDate DateTime
     preferredTime String
     message String? @db.Text
+    reservationType String @default("GENERAL") // "GENERAL", "REHABILITATION", "CUPPING", "MASSAGE", "SPIRITUAL", "CONSULTATION", "PERSONAL", "ONLINE_COURSE", "MEMBERSHIP"
+    courseId String? // For online course registration
     status String @default("PENDING") // "PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"
     teacherId String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     
     teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
     
     @@index([teacherId])
     @@index([status])
+    @@index([reservationType])
+}
+
+model Content {
+    id String @id @default(uuid())
+    type String // "CERTIFICATE_TEMPLATES", "ABOUT_US", "GENERAL_NEWS", "ABOUT_LECTURERS", "GOALS_ACHIEVEMENTS"
+    title String? @db.Text
+    content String @db.Text
+    imageUrl String? @db.Text
+    teacherId String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    
+    @@unique([teacherId, type])
+    @@index([teacherId])
+    @@index([type])
 }

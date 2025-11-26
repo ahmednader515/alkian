@@ -13,7 +13,11 @@ import {
     Key,
     GraduationCap,
     Calendar,
-    Shield
+    Shield,
+    FileCheck,
+    UserCircle,
+    Newspaper,
+    Target
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -72,6 +76,31 @@ const services = [
         icon: Calendar,
         label: "إدارة الحجوزات",
         href: "/dashboard/teacher/reservations",
+    },
+    {
+        icon: FileCheck,
+        label: "نموذج للشهادات",
+        href: "/dashboard/teacher/content/certificate-templates",
+    },
+    {
+        icon: UserCircle,
+        label: "اعرفنا أكثر",
+        href: "/dashboard/teacher/content/about-us",
+    },
+    {
+        icon: Newspaper,
+        label: "أخبار عامة",
+        href: "/dashboard/teacher/content/general-news",
+    },
+    {
+        icon: Users,
+        label: "نبذة عن المحاضرين",
+        href: "/dashboard/teacher/content/about-lecturers",
+    },
+    {
+        icon: Target,
+        label: "هدفنا وإنجازاتنا",
+        href: "/dashboard/teacher/content/goals-achievements",
     },
     {
         icon: Shield,

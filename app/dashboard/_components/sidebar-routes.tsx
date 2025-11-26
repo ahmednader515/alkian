@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart, Compass, Layout, List, Wallet, Shield, Users, Eye, TrendingUp, BookOpen, FileText, Award, PlusSquare, Key, GraduationCap, Calendar } from "lucide-react";
+import { BarChart, Compass, Layout, List, Wallet, Shield, Users, Eye, TrendingUp, BookOpen, FileText, Award, PlusSquare, Key, GraduationCap, Calendar, Newspaper, UserCircle, Target, FileCheck } from "lucide-react";
 import { SidebarItem } from "./sidebar-item";
 import { usePathname } from "next/navigation";
 
@@ -77,6 +77,31 @@ const teacherRoutes = [
         icon: Calendar,
         label: "إدارة الحجوزات",
         href: "/dashboard/teacher/reservations",
+    },
+    {
+        icon: FileCheck,
+        label: "نموذج للشهادات",
+        href: "/dashboard/teacher/content/certificate-templates",
+    },
+    {
+        icon: UserCircle,
+        label: "اعرفنا أكثر",
+        href: "/dashboard/teacher/content/about-us",
+    },
+    {
+        icon: Newspaper,
+        label: "أخبار عامة",
+        href: "/dashboard/teacher/content/general-news",
+    },
+    {
+        icon: Users,
+        label: "نبذة عن المحاضرين",
+        href: "/dashboard/teacher/content/about-lecturers",
+    },
+    {
+        icon: Target,
+        label: "هدفنا وإنجازاتنا",
+        href: "/dashboard/teacher/content/goals-achievements",
     },
     {
         icon: Shield,

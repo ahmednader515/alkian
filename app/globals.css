@@ -239,11 +239,29 @@ body,
 
 /* Pagination dots */
 .swiper-pagination {
-  bottom: 30px !important;
+  bottom: 10px !important;
   position: absolute !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   z-index: 20 !important;
+}
+
+/* Courses carousel pagination - closer to cards */
+.courses-carousel .swiper-wrapper {
+  padding-bottom: 0 !important;
+}
+
+.courses-carousel .courses-swiper {
+  padding-bottom: 0 !important;
+}
+
+.courses-carousel .courses-swiper .swiper-pagination {
+  bottom: -15px !important;
+  position: absolute !important;
+  margin-top: 0 !important;
+  transform: translateX(-50%) !important;
+  left: 50% !important;
+  width: 100% !important;
 }
 
 .swiper-pagination-bullet {

@@ -25,13 +25,30 @@ interface Reservation {
   studentName: string;
   studentPhone: string;
   studentEmail?: string;
+  governorate?: string;
   preferredDate: string;
   preferredTime: string;
   message?: string;
+  reservationType: string;
+  courseId?: string;
+  course?: { title: string };
   status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
   createdAt: string;
   updatedAt: string;
 }
+
+const reservationTypeLabels: Record<string, string> = {
+  GENERAL: "عام",
+  REHABILITATION: "جلسة تأهيل",
+  CUPPING: "جلسة حجامة",
+  MASSAGE: "جلسة تدليك",
+  SPIRITUAL: "جلسة روحانية",
+  CONSULTATION: "استشارة",
+  PERSONAL: "مقابلة شخصية",
+  ONLINE_COURSE: "تسجيل كورس أون لاين",
+  MEMBERSHIP: "طلب عضوية/وظيفة",
+  RENEWAL: "طلب تجديد",
+};
 
 const statusConfig = {
   PENDING: { 
@@ -205,8 +222,14 @@ export default function TeacherReservationsPage() {
                       <div>
                         <h3 className="font-semibold text-lg">{reservation.studentName}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {formatDate(reservation.preferredDate)} - {formatTime(reservation.preferredTime)}
+                          {reservationTypeLabels[reservation.reservationType] || reservation.reservationType}
+                          {reservation.governorate && ` - ${reservation.governorate}`}
                         </p>
+                        {reservation.preferredDate && reservation.preferredTime && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {formatDate(reservation.preferredDate)} - {formatTime(reservation.preferredTime)}
+                          </p>
+                        )}
                       </div>
                     </div>
                     
@@ -226,6 +249,13 @@ export default function TeacherReservationsPage() {
                       <span>{reservation.studentPhone}</span>
                     </div>
                     
+                    {reservation.governorate && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span>المحافظة: {reservation.governorate}</span>
+                      </div>
+                    )}
+                    
                     {reservation.studentEmail && (
                       <div className="flex items-center gap-2 text-sm">
                         <Mail className="h-4 w-4 text-muted-foreground" />
@@ -233,15 +263,26 @@ export default function TeacherReservationsPage() {
                       </div>
                     )}
                     
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>{formatDate(reservation.preferredDate)}</span>
-                    </div>
+                    {reservation.course && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>الكورس: {reservation.course.title}</span>
+                      </div>
+                    )}
                     
-                    <div className="flex items-center gap-2 text-sm">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>{formatTime(reservation.preferredTime)}</span>
-                    </div>
+                    {reservation.preferredDate && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>{formatDate(reservation.preferredDate)}</span>
+                      </div>
+                    )}
+                    
+                    {reservation.preferredTime && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span>{formatTime(reservation.preferredTime)}</span>
+                      </div>
+                    )}
                   </div>
                   
                   {reservation.message && (

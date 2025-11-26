@@ -6,12 +6,49 @@ import { authOptions } from "@/lib/auth";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { studentName, studentPhone, studentEmail, preferredDate, preferredTime, message } = body;
+    const { 
+      studentName, 
+      studentPhone, 
+      studentEmail, 
+      governorate,
+      preferredDate, 
+      preferredTime, 
+      message,
+      reservationType,
+      courseId,
+      serialNumber,
+      previousExperience
+    } = body;
 
     // Validate required fields
-    if (!studentName || !studentPhone || !preferredDate || !preferredTime) {
+    if (!studentName || !studentPhone || !governorate) {
       return NextResponse.json(
-        { error: "الاسم ورقم الهاتف والتاريخ والوقت مطلوبة" },
+        { error: "الاسم ورقم الهاتف والمحافظة مطلوبة" },
+        { status: 400 }
+      );
+    }
+
+    // Validate date/time for session types
+    const sessionTypes = ["REHABILITATION", "CUPPING", "MASSAGE", "SPIRITUAL", "CONSULTATION", "PERSONAL"];
+    if (sessionTypes.includes(reservationType) && (!preferredDate || !preferredTime)) {
+      return NextResponse.json(
+        { error: "التاريخ والوقت مطلوبة لهذا النوع من الحجوزات" },
+        { status: 400 }
+      );
+    }
+
+    // Validate course for online course registration
+    if (reservationType === "ONLINE_COURSE" && !courseId) {
+      return NextResponse.json(
+        { error: "يجب اختيار الكورس" },
+        { status: 400 }
+      );
+    }
+
+    // Validate serial number for renewal
+    if (reservationType === "RENEWAL" && !serialNumber) {
+      return NextResponse.json(
+        { error: "سريل نمبر الكارنيه أو الشهادة مطلوب" },
         { status: 400 }
       );
     }
@@ -28,17 +65,42 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Prepare reservation data
+    const reservationData: any = {
+      studentName,
+      studentPhone,
+      studentEmail: studentEmail || null,
+      governorate,
+      reservationType: reservationType || "GENERAL",
+      message: message || null,
+      teacherId: teacher.id,
+    };
+
+    // Add date/time for session types
+    if (preferredDate && preferredTime) {
+      reservationData.preferredDate = new Date(preferredDate);
+      reservationData.preferredTime = preferredTime;
+    } else if (sessionTypes.includes(reservationType)) {
+      // For session types, set a default date if not provided
+      reservationData.preferredDate = new Date();
+      reservationData.preferredTime = "09:00";
+    }
+
+    // Add course ID for online course registration
+    if (courseId) {
+      reservationData.courseId = courseId;
+    }
+
+    // Add additional message for renewal and membership
+    if (reservationType === "RENEWAL" && message) {
+      reservationData.message = `طلب تجديد - السريل نمبر: ${serialNumber}\n${message}`;
+    } else if (reservationType === "MEMBERSHIP" && previousExperience) {
+      reservationData.message = `طلب عضوية/وظيفة\nالخبرات السابقة: ${previousExperience}${message ? `\n${message}` : ''}`;
+    }
+
     // Create the reservation
     const reservation = await db.reservation.create({
-      data: {
-        studentName,
-        studentPhone,
-        studentEmail: studentEmail || null,
-        preferredDate: new Date(preferredDate),
-        preferredTime,
-        message: message || null,
-        teacherId: teacher.id,
-      },
+      data: reservationData,
     });
 
     return NextResponse.json({
@@ -71,6 +133,13 @@ export async function GET(req: NextRequest) {
 
     const reservations = await db.reservation.findMany({
       where: { teacherId: session.user.id },
+      include: {
+        course: {
+          select: {
+            title: true,
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
 
