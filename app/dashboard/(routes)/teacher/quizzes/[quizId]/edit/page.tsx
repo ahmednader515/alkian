@@ -622,7 +622,7 @@ const EditQuizPage = () => {
                                                     endpoint="courseAttachment"
                                                     onClientUploadComplete={(res) => {
                                                         if (res && res[0]) {
-                                                            updateQuestion(index, "imageUrl", res[0].url);
+                                                            updateQuestion(index, "imageUrl", res[0].ufsUrl || res[0].url);
                                                             toast.success("تم رفع الصورة بنجاح");
                                                         }
                                                         setUploadingImages(prev => ({ ...prev, [index]: false }));

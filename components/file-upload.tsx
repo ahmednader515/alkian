@@ -27,7 +27,7 @@ export const FileUpload = ({
     const handleUploadComplete = (res: any) => {
         setIsUploading(false);
         if (res && res[0]) {
-            const url = res[0].url || res[0].ufsUrl;
+            const url = res[0].ufsUrl || res[0].url;
             onChange(url);
             toast.success("تم رفع الملف بنجاح");
         }

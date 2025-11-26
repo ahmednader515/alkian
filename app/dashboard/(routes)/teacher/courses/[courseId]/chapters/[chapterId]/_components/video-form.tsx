@@ -165,8 +165,8 @@ export const VideoForm = ({
                                 <FileUpload
                                     endpoint="chapterVideo"
                                     onChange={(res) => {
-                                        if (res?.url) {
-                                            onSubmitUpload(res.url);
+                                        if (res) {
+                                            onSubmitUpload(res);
                                         }
                                     }}
                                 />

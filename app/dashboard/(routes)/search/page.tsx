@@ -2,7 +2,6 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { authOptions } from "@/lib/auth";
-import { SearchInput } from "./_components/search-input";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
@@ -80,9 +79,8 @@ export default async function SearchPage({
         })
     );
 
-    // Split courses into purchased and unpurchased
-    const purchasedCourses = coursesWithProgress.filter(course => course.purchases.length > 0);
-    const otherCourses = coursesWithProgress.filter(course => course.purchases.length === 0);
+    // Combine all courses into one array
+    const allCourses = coursesWithProgress;
 
     // Helper function to render course card
     const renderCourseCard = (course: CourseWithDetails) => (
@@ -102,84 +100,33 @@ export default async function SearchPage({
 
     return (
         <div className="p-6 space-y-6">
-            {/* Header Section */}
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">البحث عن الكورسات</h1>
-                <p className="text-muted-foreground text-lg">
-                    {title 
-                        ? `نتائج البحث عن "${title}"`
-                        : "اكتشف مجموعة متنوعة من الكورسات التعليمية المميزة"
-                    }
-                </p>
-            </div>
-
-            {/* Search Input Section */}
-            <div className="bg-card rounded-2xl p-6 border shadow-sm">
-                <div className="max-w-2xl mx-auto">
-                    <SearchInput />
-                </div>
-            </div>
-
-            {/* Section 1: Purchased Courses - Always shown first */}
+            {/* All Courses Section */}
             <div className="space-y-4">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold text-gray-900">
-                        الكورسات المشتراة ({purchasedCourses.length})
+                        {title 
+                            ? `نتائج البحث (${allCourses.length})` 
+                            : `جميع الكورسات (${allCourses.length})`
+                        }
                     </h2>
-                    {purchasedCourses.length > 0 && (
+                    {allCourses.length > 0 && (
                         <p className="text-sm text-muted-foreground">
-                            استمر من حيث توقفت
+                            {allCourses.length} كورس متاح
                         </p>
                     )}
                 </div>
 
                 {/* Course Grid */}
-                {purchasedCourses.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-4 max-w-4xl mx-auto">
-                        {purchasedCourses.map((course) => renderCourseCard(course))}
+                {allCourses.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
+                        {allCourses.map((course) => renderCourseCard(course))}
                     </div>
                 ) : (
                     <div className="text-center py-16">
                         <div className="bg-muted/50 rounded-2xl p-8 max-w-md mx-auto">
                             <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                             <h3 className="text-lg font-semibold mb-2">
-                                لا توجد كورسات مشتراة
-                            </h3>
-                            <p className="text-muted-foreground">
-                                ابدأ بشراء كورسات للاستمرار في التعلم
-                            </p>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Section 2: All Other Courses */}
-            <div className="space-y-4">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">
-                        {title 
-                            ? `نتائج البحث الأخرى (${otherCourses.length})` 
-                            : `جميع الكورسات الأخرى (${otherCourses.length})`
-                        }
-                    </h2>
-                    {otherCourses.length > 0 && (
-                        <div className="text-sm text-muted-foreground">
-                            {otherCourses.length} كورس متاح
-                        </div>
-                    )}
-                </div>
-
-                {/* Course Grid */}
-                {otherCourses.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-4 max-w-4xl mx-auto">
-                        {otherCourses.map((course) => renderCourseCard(course))}
-                    </div>
-                ) : (
-                    <div className="text-center py-16">
-                        <div className="bg-muted/50 rounded-2xl p-8 max-w-md mx-auto">
-                            <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold mb-2">
-                                {title ? "لم يتم العثور على كورسات أخرى" : "لا توجد كورسات أخرى متاحة"}
+                                {title ? "لم يتم العثور على كورسات" : "لا توجد كورسات متاحة"}
                             </h3>
                             <p className="text-muted-foreground mb-6">
                                 {title 

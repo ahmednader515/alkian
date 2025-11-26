@@ -80,7 +80,7 @@ export const ImageForm = ({
                         endpoint="courseImage"
                         onChange={(res) => {
                             if (res) {
-                                onSubmit({ imageUrl: res.url })
+                                onSubmit({ imageUrl: res })
                             }
                         }}
                     />
