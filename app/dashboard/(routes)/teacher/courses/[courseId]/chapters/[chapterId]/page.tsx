@@ -81,7 +81,7 @@ export default async function ChapterPage({
                 <div className="space-y-6">
                     <div>
                         <div className="flex items-center gap-x-2">
-                            <IconBadge icon={Video} />
+                            <IconBadge icon={Video} variant="red" />
                             <h2 className="text-xl">
                                 إضافة فيديو
                             </h2>
@@ -94,7 +94,7 @@ export default async function ChapterPage({
                     </div>
                     <div>
                         <div className="flex items-center gap-x-2">
-                            <IconBadge icon={Files} />
+                            <IconBadge icon={Files} variant="red" />
                             <h2 className="text-xl">
                                 مستندات الفصل
                             </h2>

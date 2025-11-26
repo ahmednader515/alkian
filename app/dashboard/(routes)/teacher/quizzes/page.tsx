@@ -128,65 +128,57 @@ const QuizzesPage = () => {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="text-right">عنوان الاختبار</TableHead>
-                                <TableHead className="text-right">الكورس</TableHead>
-                                <TableHead className="text-right">الموقع</TableHead>
-                                <TableHead className="text-right">الحالة</TableHead>
-                                <TableHead className="text-right">عدد الأسئلة</TableHead>
-                                <TableHead className="text-right">تاريخ الإنشاء</TableHead>
-                                <TableHead className="text-right">الإجراءات</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredQuizzes.map((quiz) => (
-                                <TableRow key={quiz.id}>
-                                    <TableCell className="font-medium">
-                                        {quiz.title}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant="outline">
-                                            {quiz.course.title}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant="secondary">
-                                            {quiz.position}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-4">
+                        {filteredQuizzes.length > 0 ? (
+                            filteredQuizzes.map((quiz) => (
+                                <div key={quiz.id} className="border rounded-lg p-4 space-y-3">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1">
+                                            <h3 className="font-semibold text-lg">{quiz.title}</h3>
+                                            <div className="mt-2 space-y-1">
+                                                <div className="text-sm">
+                                                    <Badge variant="outline" className="mr-2">
+                                                        {quiz.course.title}
+                                                    </Badge>
+                                                </div>
+                                                <div className="text-sm text-muted-foreground">
+                                                    الموقع: <Badge variant="secondary">{quiz.position}</Badge>
+                                                </div>
+                                                <div className="text-sm text-muted-foreground">
+                                                    عدد الأسئلة: <Badge variant="secondary">{quiz.questions.length} سؤال</Badge>
+                                                </div>
+                                                <div className="text-sm text-muted-foreground">
+                                                    تاريخ الإنشاء: {new Date(quiz.createdAt).toLocaleDateString("ar-EG")}
+                                                </div>
+                                            </div>
+                                        </div>
                                         <Badge variant={quiz.isPublished ? "default" : "secondary"}>
                                             {quiz.isPublished ? "منشور" : "مسودة"}
                                         </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant="secondary">
-                                            {quiz.questions.length} سؤال
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        {new Date(quiz.createdAt).toLocaleDateString("ar-EG")}
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center space-x-2">
+                                    </div>
+                                    <div className="flex flex-col gap-2 pt-2 border-t">
+                                        <div className="grid grid-cols-2 gap-2">
                                             <Button 
                                                 size="sm" 
                                                 variant="outline"
                                                 onClick={() => handleViewQuiz(quiz)}
+                                                className="w-full"
                                             >
-                                                <Eye className="h-4 w-4" />
+                                                <Eye className="h-4 w-4 mr-2" />
                                                 عرض
                                             </Button>
                                             <Button 
                                                 size="sm" 
                                                 variant="outline"
                                                 onClick={() => router.push(`/dashboard/teacher/quizzes/${quiz.id}/edit`)}
+                                                className="w-full"
                                             >
-                                                <Edit className="h-4 w-4" />
+                                                <Edit className="h-4 w-4 mr-2" />
                                                 تعديل
                                             </Button>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
                                             <Button 
                                                 size="sm" 
                                                 variant={quiz.isPublished ? "destructive" : "default"}
@@ -209,25 +201,134 @@ const QuizzesPage = () => {
                                                         toast.error("حدث خطأ");
                                                     }
                                                 }}
+                                                className="w-full"
                                             >
                                                 {quiz.isPublished ? "إلغاء النشر" : "نشر"}
                                             </Button>
-
                                             <Button 
                                                 size="sm" 
                                                 variant="destructive"
                                                 onClick={() => handleDeleteQuiz(quiz)}
                                                 disabled={isDeleting === quiz.id}
+                                                className="w-full"
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <Trash2 className="h-4 w-4 mr-2" />
                                                 {isDeleting === quiz.id ? "جاري الحذف..." : "حذف"}
                                             </Button>
                                         </div>
-                                    </TableCell>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-8 text-muted-foreground">
+                                لا توجد اختبارات
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="text-right">عنوان الاختبار</TableHead>
+                                    <TableHead className="text-right">الكورس</TableHead>
+                                    <TableHead className="text-right">الموقع</TableHead>
+                                    <TableHead className="text-right">الحالة</TableHead>
+                                    <TableHead className="text-right">عدد الأسئلة</TableHead>
+                                    <TableHead className="text-right">تاريخ الإنشاء</TableHead>
+                                    <TableHead className="text-right">الإجراءات</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredQuizzes.map((quiz) => (
+                                    <TableRow key={quiz.id}>
+                                        <TableCell className="font-medium">
+                                            {quiz.title}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline">
+                                                {quiz.course.title}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant="secondary">
+                                                {quiz.position}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant={quiz.isPublished ? "default" : "secondary"}>
+                                                {quiz.isPublished ? "منشور" : "مسودة"}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant="secondary">
+                                                {quiz.questions.length} سؤال
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            {new Date(quiz.createdAt).toLocaleDateString("ar-EG")}
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center space-x-2">
+                                                <Button 
+                                                    size="sm" 
+                                                    variant="outline"
+                                                    onClick={() => handleViewQuiz(quiz)}
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                    عرض
+                                                </Button>
+                                                <Button 
+                                                    size="sm" 
+                                                    variant="outline"
+                                                    onClick={() => router.push(`/dashboard/teacher/quizzes/${quiz.id}/edit`)}
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                    تعديل
+                                                </Button>
+                                                <Button 
+                                                    size="sm" 
+                                                    variant={quiz.isPublished ? "destructive" : "default"}
+                                                    onClick={async () => {
+                                                        try {
+                                                            const response = await fetch(`/api/teacher/quizzes/${quiz.id}/publish`, {
+                                                                method: "PATCH",
+                                                                headers: {
+                                                                    "Content-Type": "application/json",
+                                                                },
+                                                                body: JSON.stringify({
+                                                                    isPublished: !quiz.isPublished
+                                                                }),
+                                                            });
+                                                            if (response.ok) {
+                                                                toast.success(quiz.isPublished ? "تم إلغاء النشر" : "تم النشر بنجاح");
+                                                                fetchQuizzes();
+                                                            }
+                                                        } catch (error) {
+                                                            toast.error("حدث خطأ");
+                                                        }
+                                                    }}
+                                                >
+                                                    {quiz.isPublished ? "إلغاء النشر" : "نشر"}
+                                                </Button>
+
+                                                <Button 
+                                                    size="sm" 
+                                                    variant="destructive"
+                                                    onClick={() => handleDeleteQuiz(quiz)}
+                                                    disabled={isDeleting === quiz.id}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                    {isDeleting === quiz.id ? "جاري الحذف..." : "حذف"}
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
         </div>

@@ -181,7 +181,7 @@ export const ChapterForm = ({
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-x-2">
-                    <IconBadge icon={LayoutDashboard} />
+                    <IconBadge icon={LayoutDashboard} variant="red" />
                     <h2 className="text-xl">
                         إعدادات الفصل
                     </h2>
@@ -327,7 +327,7 @@ export const ChapterForm = ({
 
             <div>
                 <div className="flex items-center gap-x-2">
-                    <IconBadge icon={Eye} />
+                    <IconBadge icon={Eye} variant="red" />
                     <h2 className="text-xl">
                         إعدادات الوصول
                     </h2>

@@ -129,7 +129,7 @@ export default async function CourseIdPage({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
                     <div>
                         <div className="flex items-center gap-x-2">
-                            <IconBadge icon={LayoutDashboard} />
+                            <IconBadge icon={LayoutDashboard} variant="red" />
                             <h2 className="text-xl">
                                 تخصيص دورتك
                             </h2>
@@ -150,24 +150,24 @@ export default async function CourseIdPage({
                     <div className="space-y-6">
                         <div>
                             <div className="flex items-center gap-x-2">
-                                <IconBadge icon={LayoutDashboard} />
+                                <IconBadge icon={LayoutDashboard} variant="red" />
                                 <h2 className="text-xl">
-                                    الموارد والفصول
+                                    إعدادات الكورس
                                 </h2>
                             </div>
-                            <CourseContentForm
+                            <ImageForm
                                 initialData={course}
                                 courseId={course.id}
                             />
                         </div>
                         <div>
                             <div className="flex items-center gap-x-2">
-                                <IconBadge icon={LayoutDashboard} />
+                                <IconBadge icon={LayoutDashboard} variant="red" />
                                 <h2 className="text-xl">
-                                    إعدادات الكورس
+                                    الموارد والفصول
                                 </h2>
                             </div>
-                            <ImageForm
+                            <CourseContentForm
                                 initialData={course}
                                 courseId={course.id}
                             />

@@ -23,11 +23,15 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import Link from "next/link";
 import { Pencil, Trash2, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { formatPrice } from "@/lib/format";
+import { format } from "date-fns";
+import { ar } from "date-fns/locale";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -93,6 +97,8 @@ export function CoursesTable<TData extends { id: string }, TValue>({
         }
     };
 
+    const filteredData = table.getFilteredRowModel().rows.map(row => row.original);
+
     return (
         <div>
             <div className="flex items-center py-4">
@@ -106,7 +112,69 @@ export function CoursesTable<TData extends { id: string }, TValue>({
                     />
                 </div>
             </div>
-            <div className="rounded-md border">
+            
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+                {filteredData.length > 0 ? (
+                    filteredData.map((course) => (
+                        <div key={course.id} className="border rounded-lg p-4 space-y-3">
+                            <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                    <h3 className="font-semibold text-lg">{course.title}</h3>
+                                    <div className="mt-2 space-y-1">
+                                        <div className="text-sm text-muted-foreground">
+                                            السعر: {formatPrice(course.price)}
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                            تاريخ الإنشاء: {format(new Date(course.createdAt), "dd/MM/yyyy", { locale: ar })}
+                                        </div>
+                                    </div>
+                                </div>
+                                <Badge variant={course.isPublished ? "default" : "secondary"}>
+                                    {course.isPublished ? "منشور" : "مسودة"}
+                                </Badge>
+                            </div>
+                            <div className="flex items-center gap-2 pt-2 border-t">
+                                <Link href={`/dashboard/teacher/courses/${course.id}`} className="flex-1">
+                                    <Button variant="outline" size="sm" className="w-full">
+                                        <Pencil className="h-4 w-4 mr-2" />
+                                        تعديل
+                                    </Button>
+                                </Link>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="destructive" size="sm" className="flex-1">
+                                            <Trash2 className="h-4 w-4 mr-2" />
+                                            حذف
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                لا يمكن التراجع عن هذا العمل. سيتم حذف الكورس وكل محتواها بشكل دائم.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => onDelete(course.id)}>
+                                                حذف
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                        لا يوجد نتائج.
+                    </div>
+                )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block rounded-md border">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (

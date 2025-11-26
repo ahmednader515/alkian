@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {
-    Layout,
     List,
     FileText,
     Award,
@@ -19,16 +18,13 @@ import {
     Newspaper,
     Target,
     UserPlus,
-    RefreshCw
+    RefreshCw,
+    AlertCircle,
+    Briefcase
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const services = [
-    {
-        icon: Layout,
-        label: "لوحة التحكم",
-        href: "/dashboard/teacher",
-    },
     {
         icon: List,
         label: "الكورسات",
@@ -123,6 +119,16 @@ const services = [
         icon: RefreshCw,
         label: "طلبات التجديد",
         href: "/dashboard/teacher/renewal-requests",
+    },
+    {
+        icon: AlertCircle,
+        label: "الشكاوى",
+        href: "/dashboard/teacher/complaints",
+    },
+    {
+        icon: Briefcase,
+        label: "إدارة الخدمات",
+        href: "/dashboard/teacher/services",
     },
 ];
 

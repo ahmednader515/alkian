@@ -3,30 +3,29 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight, Briefcase } from "lucide-react";
 import Link from "next/link";
 import axios from "axios";
 
-interface Course {
+interface Service {
   id: string;
   title: string;
-  chapters: { id: string }[];
 }
 
 export default function ServicesPage() {
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchCourses();
+    fetchServices();
   }, []);
 
-  const fetchCourses = async () => {
+  const fetchServices = async () => {
     try {
-      const response = await axios.get("/api/courses");
-      setCourses(response.data);
+      const response = await axios.get("/api/services");
+      setServices(response.data.services || []);
     } catch (error) {
-      console.error("Error fetching courses:", error);
+      console.error("Error fetching services:", error);
     } finally {
       setLoading(false);
     }
@@ -50,27 +49,26 @@ export default function ServicesPage() {
         </div>
       ) : (
         <div>
-          <div className="grid grid-cols-3 gap-4 max-w-6xl mx-auto">
-            {courses.map((course) => (
-              <Link
-                key={course.id}
-                href={course.chapters.length > 0 ? `/courses/${course.id}/chapters/${course.chapters[0].id}` : `/courses/${course.id}`}
-                className="flex flex-col items-center justify-center p-4 rounded-xl bg-white text-black transition-all duration-200 hover:scale-105 shadow-md border-2 border-gray-200 hover:border-gray-300 min-h-40"
+          <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+            {services.map((service) => (
+              <div
+                key={service.id}
+                className="flex flex-col items-center justify-center p-4 rounded-xl bg-white text-black transition-all duration-200 shadow-md border-2 border-gray-200 min-h-40"
               >
                 <div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-50 mb-2">
-                  <BookOpen className="h-5 w-5 text-red-600" />
+                  <Briefcase className="h-5 w-5 text-red-600" />
                 </div>
-                <span className="text-xs font-medium text-center leading-tight px-2">{course.title}</span>
-              </Link>
+                <span className="text-xs font-medium text-center leading-tight px-2">{service.title}</span>
+              </div>
             ))}
           </div>
 
-          {courses.length === 0 && (
+          {services.length === 0 && (
             <Card>
               <CardContent className="py-12 text-center">
-                <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <Briefcase className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground text-lg">
-                  لا توجد كورسات متاحة حالياً
+                  لا توجد خدمات متاحة حالياً
                 </p>
               </CardContent>
             </Card>

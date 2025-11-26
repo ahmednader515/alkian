@@ -245,12 +245,12 @@ const ChapterPage = () => {
 
   if (!hasAccess && !chapter.isFree) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-center space-y-4">
+      <div className="h-full flex items-center justify-center min-h-[calc(100vh-80px)]">
+        <div className="text-center space-y-4 w-full max-w-md px-4">
           <Lock className="h-8 w-8 mx-auto text-muted-foreground" />
           <h2 className="text-2xl font-semibold">هذا الفصل مغلق</h2>
           <p className="text-muted-foreground">شراء الكورس للوصول إلى جميع الفصول</p>
-          <Button onClick={() => router.push(`/courses/${routeParams.courseId}/purchase`)}>
+          <Button onClick={() => router.push(`/courses/${routeParams.courseId}/purchase`)} className="w-full">
             شراء الكورس
           </Button>
         </div>

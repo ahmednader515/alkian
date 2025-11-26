@@ -108,9 +108,10 @@ export const CourseContentForm = ({
                     <div className="animate-spin h-6 w-6 border-4 border-primary rounded-full border-t-transparent" />
                 </div>
             )}
-            <div className="font-medium flex items-center justify-between">
-                محتوى الكورس (فصول واختبارات)
-                <div className="flex gap-2">
+            <div className="font-medium flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <span>محتوى الكورس (فصول واختبارات)</span>
+                {/* Desktop buttons - top */}
+                <div className="hidden md:flex gap-2">
                     <Button onClick={() => router.push(`/dashboard/teacher/quizzes/create?courseId=${courseId}`)} variant="ghost">
                         <PlusCircle className="h-4 w-4 mr-2" />
                         إضافة اختبار
@@ -159,9 +160,36 @@ export const CourseContentForm = ({
                 </div>
             )}
             {!isCreating && courseItems.length > 0 && (
-                <p className="text-xs text-muted-foreground mt-4">
-                    قم بالسحب والإفلات لترتيب الفصول والاختبارات
-                </p>
+                <>
+                    <p className="hidden md:block text-xs text-muted-foreground mt-4">
+                        قم بالسحب والإفلات لترتيب الفصول والاختبارات
+                    </p>
+                    {/* Mobile buttons - bottom */}
+                    <div className="md:hidden flex gap-2 mt-4 pt-4 border-t">
+                        <Button 
+                            onClick={() => router.push(`/dashboard/teacher/quizzes/create?courseId=${courseId}`)} 
+                            variant="ghost"
+                            className="flex-1"
+                        >
+                            <PlusCircle className="h-4 w-4 mr-2" />
+                            إضافة اختبار
+                        </Button>
+                        <Button 
+                            onClick={() => setIsCreating((current) => !current)} 
+                            variant="ghost"
+                            className="flex-1"
+                        >
+                            {isCreating ? (
+                                <>إلغاء</>
+                            ) : (
+                                <>
+                                    <PlusCircle className="h-4 w-4 mr-2" />
+                                    إضافة فصل
+                                </>
+                            )}
+                        </Button>
+                    </div>
+                </>
             )}
         </div>
     );

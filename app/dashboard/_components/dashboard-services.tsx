@@ -1,6 +1,8 @@
 "use client";
 
 import { ServiceCard } from "./service-card";
+import { DashboardSearch } from "./dashboard-search";
+import { DashboardFooter } from "./dashboard-footer";
 import { 
   Briefcase, 
   Award, 
@@ -15,7 +17,8 @@ import {
   FileText, 
   Users, 
   RefreshCw, 
-  Target 
+  Target,
+  AlertCircle
 } from "lucide-react";
 
 const services = [
@@ -103,11 +106,24 @@ const services = [
     icon: Target,
     href: "/dashboard/content/goals-achievements",
   },
+  {
+    id: "15",
+    title: "تقديم شكوى",
+    icon: AlertCircle,
+    href: "/dashboard/complaint",
+  },
+  {
+    id: "16",
+    title: "الكورسات المسجلة",
+    icon: BookOpen,
+    href: "/dashboard/my-courses",
+  },
 ];
 
 export const DashboardServices = () => {
   return (
     <div className="p-6 space-y-6">
+      <DashboardSearch />
       <div className="space-y-4">
         <h2 className="text-xl md:text-2xl font-bold text-red-600 mb-6">
           الخدمات الرئيسية
@@ -124,6 +140,7 @@ export const DashboardServices = () => {
           ))}
         </div>
       </div>
+      <DashboardFooter />
     </div>
   );
 };

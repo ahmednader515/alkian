@@ -31,6 +31,8 @@ model User {
   contents                Content[]
   certificateTemplates    CertificateTemplate[]
   contentItems            ContentItem[]
+  complaints              Complaint[]
+  services                Service[]
 }
 
 model Course {
@@ -326,4 +328,33 @@ model ContentItem {
     
     @@index([teacherId])
     @@index([type])
+}
+
+model Complaint {
+    id String @id @default(uuid())
+    studentName String
+    studentPhone String
+    studentEmail String?
+    message String @db.Text
+    status String @default("PENDING") // "PENDING", "REVIEWED", "RESOLVED"
+    teacherId String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    
+    @@index([teacherId])
+    @@index([status])
+}
+
+model Service {
+    id String @id @default(uuid())
+    title String @db.Text
+    teacherId String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    
+    @@index([teacherId])
 }
