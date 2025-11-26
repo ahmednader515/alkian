@@ -11,17 +11,9 @@ const CoursesPage = async () => {
     return redirect("/");
   }
 
-  // Redirect non-students to their role-specific dashboard
-  if (session.user.role !== "USER") {
-    const dashboardUrl = getDashboardUrlByRole(session.user.role);
-    return redirect(dashboardUrl);
-  }
-
-  return (
-    <div>
-      <MainServices />
-    </div>
-  );
+  // Redirect all users to their role-specific dashboard
+  const dashboardUrl = getDashboardUrlByRole(session.user.role);
+  return redirect(dashboardUrl);
 }
 
 export default CoursesPage;

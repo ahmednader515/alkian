@@ -88,13 +88,13 @@ export default async function SearchPage({
             key={course.id}
             href={course.chapters.length > 0 ? `/courses/${course.id}/chapters/${course.chapters[0].id}` : `/courses/${course.id}`}
             className={cn(
-                "flex flex-col items-center justify-center p-6 rounded-xl bg-white text-black transition-all duration-200 hover:scale-105 shadow-md border-2 border-gray-200 hover:border-gray-300 h-32"
+                "flex flex-col items-center justify-center p-4 rounded-xl bg-white text-black transition-all duration-200 hover:scale-105 shadow-md border-2 border-gray-200 hover:border-gray-300 min-h-40"
             )}
         >
-            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-50 mb-3">
-                <BookOpen className="h-8 w-8 text-red-600" />
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-50 mb-2">
+                <BookOpen className="h-5 w-5 text-red-600" />
             </div>
-            <span className="text-sm font-medium text-center leading-tight line-clamp-2">{course.title}</span>
+            <span className="text-xs font-medium text-center leading-tight px-2">{course.title}</span>
         </Link>
     );
 

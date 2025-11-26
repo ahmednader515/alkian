@@ -12,7 +12,7 @@ function getDashboardUrlByRole(role: string): string {
       return "/dashboard/admin/users";
     case "USER":
     default:
-      return "/dashboard";
+      return "/dashboard/search";
   }
 }
 
@@ -56,12 +56,12 @@ export default withAuth(
 
     // If user is not a teacher or admin but trying to access teacher routes
     if (isTeacherRoute && !(isTeacher || isAdmin)) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+      return NextResponse.redirect(new URL("/dashboard/search", req.url));
     }
 
     // If user is not an admin but trying to access admin routes
     if (isAdminRoute && !isAdmin) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+      return NextResponse.redirect(new URL("/dashboard/search", req.url));
     }
 
     // If user accesses main dashboard, redirect to role-specific dashboard
