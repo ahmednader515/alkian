@@ -1,0 +1,360 @@
+// prisma/schema.prisma
+datasource db {
+  provider  = "mysql"
+  url  	    = env("DATABASE_URL")
+  // uncomment next line if you use Prisma <5.10
+  // directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                      String    @id @default(uuid())
+  fullName                String
+  phoneNumber             String    @unique
+  hashedPassword          String?
+  image                   String?
+  role                    String    @default("USER")
+  balance                 Float     @default(0)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  courses                 Course[]
+  purchases               Purchase[]
+  userProgress            UserProgress[]
+  balanceTransactions     BalanceTransaction[]
+  quizResults             QuizResult[]
+  certificates            Certificate[]
+  certificateDownloads    CertificateDownload[]
+  reservations            Reservation[]
+  contents                Content[]
+  certificateTemplates    CertificateTemplate[]
+  contentItems            ContentItem[]
+  complaints              Complaint[]
+  services                Service[]
+}
+
+model Course {
+  id String @id @default(uuid())
+  userId String
+  title String @db.Text
+  description String? @db.Text
+  imageUrl String? @db.Text
+  price Float?
+  isPublished Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  attachments Attachment[]
+  chapters Chapter[]
+  purchases Purchase[]
+  quizzes Quiz[]
+  reservations Reservation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Attachment {
+  id String @id @default(uuid())
+  name String
+  url String @db.Text
+
+  courseId String
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+}
+
+model Chapter {
+  id String @id @default(uuid())
+  title String @db.Text
+  description String? @db.Text
+  videoUrl String? @db.Text
+  videoType String? @default("UPLOAD") // "UPLOAD" or "YOUTUBE"
+  youtubeVideoId String? // Store YouTube video ID
+  documentUrl String? @db.Text // Store document URL (legacy - for backward compatibility)
+  documentName String? // Store original document filename (legacy - for backward compatibility)
+  position Int
+  isPublished Boolean @default(false)
+  isFree Boolean @default(false)
+
+  courseId String
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  userProgress UserProgress[]
+  attachments ChapterAttachment[] // New relation for multiple documents
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+}
+
+model ChapterAttachment {
+  id String @id @default(uuid())
+  name String
+  url String @db.Text
+  position Int @default(0)
+
+  chapterId String
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chapterId])
+}
+
+model UserProgress {
+    id        String   @id @default(uuid())
+    userId    String
+    chapterId String
+    isCompleted Boolean @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, chapterId])
+    @@index([chapterId])
+}
+
+model Purchase {
+    id String @id @default(uuid())
+    userId String
+    courseId String
+    status String @default("ACTIVE")
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([userId, courseId])
+    @@index([courseId])
+}
+
+model BalanceTransaction {
+    id String @id @default(uuid())
+    userId String
+    amount Float
+    type String // "DEPOSIT" or "PURCHASE"
+    description String
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([userId])
+}
+
+model Quiz {
+    id String @id @default(uuid())
+    title String
+    description String? @db.Text
+    position Int
+    isPublished Boolean @default(false)
+    timer Int? // Timer in minutes, null means no time limit
+    maxAttempts Int @default(1) // Maximum number of attempts allowed
+    courseId String
+    course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+    questions Question[]
+    quizResults QuizResult[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([courseId])
+}
+
+model Question {
+    id String @id @default(uuid())
+    text String @db.Text
+    type String // "MULTIPLE_CHOICE", "TRUE_FALSE", "SHORT_ANSWER"
+    options String? @db.Text // JSON string for multiple choice options
+    correctAnswer String @db.Text
+    points Int @default(1)
+    imageUrl String? @db.Text
+    position Int @default(1)
+    quizId String
+    quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+    answers QuizAnswer[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([quizId])
+}
+
+model QuizResult {
+    id String @id @default(uuid())
+    studentId String
+    quizId String
+    score Int
+    totalPoints Int
+    percentage Float
+    attemptNumber Int @default(1) // Track which attempt this is
+    submittedAt DateTime @default(now())
+    user User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+    quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+    answers QuizAnswer[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([studentId, quizId])
+    @@index([quizId])
+}
+
+model QuizAnswer {
+    id String @id @default(uuid())
+    questionId String
+    quizResultId String
+    studentAnswer String @db.Text
+    correctAnswer String @db.Text
+    isCorrect Boolean
+    pointsEarned Int
+    question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    quizResult QuizResult @relation(fields: [quizResultId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([questionId])
+    @@index([quizResultId])
+}
+
+model Certificate {
+    id String @id @default(uuid())
+    title String
+    description String? @db.Text
+    fileUrl String @db.Text
+    promoCode String @unique
+    teacherId String
+    isActive Boolean @default(true)
+    downloadCount Int @default(0)
+    maxDownloads Int? // null means unlimited
+    expiresAt DateTime?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    downloads CertificateDownload[]
+    
+    @@index([teacherId])
+    @@index([promoCode])
+}
+
+model CertificateDownload {
+    id String @id @default(uuid())
+    certificateId String
+    studentId String?
+    studentName String?
+    studentEmail String?
+    downloadedAt DateTime @default(now())
+    
+    certificate Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+    student User? @relation(fields: [studentId], references: [id], onDelete: SetNull)
+    
+    @@index([certificateId])
+    @@index([studentId])
+}
+
+model Reservation {
+    id String @id @default(uuid())
+    studentName String
+    studentPhone String
+    studentEmail String?
+    governorate String? // المحافظة
+    preferredDate DateTime
+    preferredTime String
+    message String? @db.Text
+    reservationType String @default("GENERAL") // "GENERAL", "REHABILITATION", "CUPPING", "MASSAGE", "SPIRITUAL", "CONSULTATION", "PERSONAL", "ONLINE_COURSE", "MEMBERSHIP"
+    courseId String? // For online course registration
+    status String @default("PENDING") // "PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"
+    teacherId String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+    
+    @@index([teacherId])
+    @@index([status])
+    @@index([reservationType])
+}
+
+model Content {
+    id String @id @default(uuid())
+    type String // "CERTIFICATE_TEMPLATES", "ABOUT_US", "GENERAL_NEWS", "ABOUT_LECTURERS", "GOALS_ACHIEVEMENTS"
+    title String? @db.Text
+    content String @db.Text
+    imageUrl String? @db.Text
+    teacherId String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    
+    @@unique([teacherId, type])
+    @@index([teacherId])
+    @@index([type])
+}
+
+model CertificateTemplate {
+    id String @id @default(uuid())
+    title String? @db.Text
+    imageUrl String @db.Text
+    description String? @db.Text
+    teacherId String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    
+    @@index([teacherId])
+}
+
+model ContentItem {
+    id String @id @default(uuid())
+    type String // "ABOUT_US", "GENERAL_NEWS", "ABOUT_LECTURERS", "GOALS_ACHIEVEMENTS"
+    title String? @db.Text
+    content String @db.Text
+    imageUrl String? @db.Text
+    teacherId String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    
+    @@index([teacherId])
+    @@index([type])
+}
+
+model Complaint {
+    id String @id @default(uuid())
+    studentName String
+    studentPhone String
+    studentEmail String?
+    message String @db.Text
+    status String @default("PENDING") // "PENDING", "REVIEWED", "RESOLVED"
+    teacherId String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    
+    @@index([teacherId])
+    @@index([status])
+}
+
+model Service {
+    id String @id @default(uuid())
+    title String @db.Text
+    teacherId String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    
+    @@index([teacherId])
+}
