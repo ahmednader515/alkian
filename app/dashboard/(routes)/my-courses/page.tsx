@@ -14,11 +14,16 @@ interface Course {
   description: string | null;
   imageUrl: string | null;
   price: number | null;
-  chapters: { id: string }[];
+  chapters: { id: string; position: number }[];
+  quizzes: { id: string; position: number }[];
+}
+
+interface CourseWithContentUrl extends Course {
+  contentUrl: string | null;
 }
 
 export default function MyCoursesPage() {
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [courses, setCourses] = useState<CourseWithContentUrl[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,7 +33,33 @@ export default function MyCoursesPage() {
   const fetchCourses = async () => {
     try {
       const response = await axios.get("/api/courses");
-      setCourses(response.data || []);
+      const coursesData: Course[] = response.data || [];
+      
+      // Fetch first content for each course
+      const coursesWithContent = await Promise.all(
+        coursesData.map(async (course) => {
+          try {
+            const contentResponse = await axios.get(`/api/courses/${course.id}/content`);
+            const content = contentResponse.data || [];
+            
+            if (content.length === 0) {
+              return { ...course, contentUrl: null };
+            }
+
+            const firstContent = content[0];
+            const contentUrl = firstContent.type === 'chapter'
+              ? `/courses/${course.id}/chapters/${firstContent.id}`
+              : `/courses/${course.id}/quizzes/${firstContent.id}`;
+
+            return { ...course, contentUrl };
+          } catch (error) {
+            console.error(`Error fetching content for course ${course.id}:`, error);
+            return { ...course, contentUrl: null };
+          }
+        })
+      );
+
+      setCourses(coursesWithContent);
     } catch (error) {
       console.error("Error fetching courses:", error);
     } finally {
@@ -101,16 +132,15 @@ export default function MyCoursesPage() {
                     asChild
                     size="sm"
                     className="bg-[#052c4b] hover:bg-[#052c4b]/90"
+                    disabled={!course.contentUrl}
                   >
-                    <Link
-                      href={
-                        course.chapters.length > 0
-                          ? `/courses/${course.id}/chapters/${course.chapters[0].id}`
-                          : `/courses/${course.id}`
-                      }
-                    >
-                      عرض الكورس
-                    </Link>
+                    {course.contentUrl ? (
+                      <Link href={course.contentUrl}>
+                        عرض الكورس
+                      </Link>
+                    ) : (
+                      <span>لا يوجد محتوى</span>
+                    )}
                   </Button>
                 </div>
               </CardContent>

@@ -53,7 +53,11 @@ export async function GET(req: Request) {
           },
           select: {
             id: true,
-          }
+            position: true,
+          },
+          orderBy: {
+            position: "asc",
+          },
         },
         quizzes: {
           where: {
@@ -61,7 +65,11 @@ export async function GET(req: Request) {
           },
           select: {
             id: true,
-          }
+            position: true,
+          },
+          orderBy: {
+            position: "asc",
+          },
         },
         purchases: includeProgress && userId ? {
           where: {
