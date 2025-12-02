@@ -10,6 +10,7 @@ import axios from "axios";
 interface Service {
   id: string;
   title: string;
+  type?: "course" | "service";
 }
 
 export default function ServicesPage() {

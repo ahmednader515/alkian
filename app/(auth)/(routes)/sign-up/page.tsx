@@ -158,7 +158,8 @@ export default function SignUpPage() {
                 placeholder="+20XXXXXXXXXX"
               />
             </div>
-            <div className="space-y-2">
+            {/* Account type selector hidden - default is "trainee" */}
+            <div className="hidden">
               <Label htmlFor="accountType">نوع الحساب</Label>
               <select
                 id="accountType"

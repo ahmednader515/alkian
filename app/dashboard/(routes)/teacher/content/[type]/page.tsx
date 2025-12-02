@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Save, FileText, Image as ImageIcon, Plus, Edit, Trash2, X } from "lucide-react";
+import { Save, FileText, Image as ImageIcon, Plus, Edit, Trash2, X, ZoomIn, ZoomOut, RotateCw } from "lucide-react";
 import axios from "axios";
 import { FileUpload } from "@/components/file-upload";
 import Image from "next/image";
@@ -51,6 +51,10 @@ const contentTypes: Record<string, { title: string; description: string }> = {
   "goals-achievements": {
     title: "هدفنا وإنجازاتنا",
     description: "إدارة الأهداف والإنجازات"
+  },
+  "our-branches": {
+    title: "فروعنا",
+    description: "إدارة فروع المركز"
   },
 };
 
@@ -114,7 +118,15 @@ export default function ContentManagementPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
 
-  const contentTypesWithMultipleItems = ["about-us", "general-news", "about-lecturers", "goals-achievements"];
+  // Image zoom state
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  const contentTypesWithMultipleItems = ["about-us", "general-news", "about-lecturers", "goals-achievements", "our-branches"];
 
   useEffect(() => {
     if (type === "certificate-templates") {
@@ -256,6 +268,82 @@ export default function ContentManagementPage() {
     }
   };
 
+  // Image zoom handlers
+  const openImageModal = (imageUrl: string) => {
+    setSelectedImage(imageUrl);
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  const closeImageModal = () => {
+    setSelectedImage(null);
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  const handleZoomIn = () => {
+    setZoom((prev) => Math.min(prev + 0.25, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoom((prev) => Math.max(prev - 0.25, 0.5));
+  };
+
+  const handleReset = () => {
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (!selectedImage) return;
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    setZoom((prev) => Math.max(0.5, Math.min(3, prev + delta)));
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoom > 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoom > 1) {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (zoom > 1 && e.touches.length === 1) {
+      setIsDragging(true);
+      setDragStart({
+        x: e.touches[0].clientX - position.x,
+        y: e.touches[0].clientY - position.y,
+      });
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isDragging && zoom > 1 && e.touches.length === 1) {
+      setPosition({
+        x: e.touches[0].clientX - dragStart.x,
+        y: e.touches[0].clientY - dragStart.y,
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
   const handleSubmitContentItem = async () => {
     if (!contentItemFormData.content.trim()) {
       toast.error("يرجى إدخال المحتوى");
@@ -358,13 +446,19 @@ export default function ContentManagementPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {templates.map((template) => (
               <Card key={template.id} className="overflow-hidden">
-                <div className="relative aspect-[4/3] bg-muted">
+                <div 
+                  className="relative aspect-[4/3] bg-muted cursor-pointer group"
+                  onClick={() => openImageModal(template.imageUrl)}
+                >
                   <Image
                     src={template.imageUrl}
                     alt={template.title || "نموذج شهادة"}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform group-hover:scale-105"
                   />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                    <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
                 </div>
                 <CardHeader>
                   {template.title && (
@@ -440,13 +534,19 @@ export default function ContentManagementPage() {
                   value={templateFormData.imageUrl}
                 />
                 {templateFormData.imageUrl && (
-                  <div className="mt-2 relative w-full h-64 rounded-lg overflow-hidden border">
+                  <div 
+                    className="mt-2 relative w-full h-64 rounded-lg overflow-hidden border cursor-pointer group"
+                    onClick={() => openImageModal(templateFormData.imageUrl)}
+                  >
                     <Image
                       src={templateFormData.imageUrl}
                       alt="Preview"
                       fill
-                      className="object-contain"
+                      className="object-contain transition-transform group-hover:scale-105"
                     />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                      <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
                   </div>
                 )}
               </div>
@@ -551,13 +651,19 @@ export default function ContentManagementPage() {
             {contentItems.map((item) => (
               <Card key={item.id} className="overflow-hidden">
                 {item.imageUrl && (
-                  <div className="relative aspect-video bg-muted">
+                  <div 
+                    className="relative aspect-video bg-muted cursor-pointer group"
+                    onClick={() => openImageModal(item.imageUrl!)}
+                  >
                     <Image
                       src={item.imageUrl}
                       alt={item.title || "صورة المحتوى"}
                       fill
-                      className="object-cover"
+                      className="object-cover transition-transform group-hover:scale-105"
                     />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                      <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
                   </div>
                 )}
                 <CardHeader>
@@ -633,13 +739,19 @@ export default function ContentManagementPage() {
                   value={contentItemFormData.imageUrl}
                 />
                 {contentItemFormData.imageUrl && (
-                  <div className="mt-2 relative w-full h-64 rounded-lg overflow-hidden border">
+                  <div 
+                    className="mt-2 relative w-full h-64 rounded-lg overflow-hidden border cursor-pointer group"
+                    onClick={() => openImageModal(contentItemFormData.imageUrl)}
+                  >
                     <Image
                       src={contentItemFormData.imageUrl}
                       alt="Preview"
                       fill
-                      className="object-contain"
+                      className="object-contain transition-transform group-hover:scale-105"
                     />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                      <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
                   </div>
                 )}
               </div>
@@ -757,12 +869,20 @@ export default function ContentManagementPage() {
                   value={formData.imageUrl}
                 />
                 {formData.imageUrl && (
-                  <div className="mt-2">
-                    <img 
-                      src={formData.imageUrl} 
-                      alt="Preview" 
-                      className="max-w-xs rounded-lg border"
-                    />
+                  <div 
+                    className="mt-2 cursor-pointer group inline-block"
+                    onClick={() => openImageModal(formData.imageUrl)}
+                  >
+                    <div className="relative">
+                      <img 
+                        src={formData.imageUrl} 
+                        alt="Preview" 
+                        className="max-w-xs rounded-lg border transition-transform group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center rounded-lg">
+                        <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -792,6 +912,79 @@ export default function ContentManagementPage() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Image Zoom Modal */}
+      <Dialog open={!!selectedImage} onOpenChange={closeImageModal}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95 border-none">
+          <DialogTitle className="sr-only">صورة مكبرة</DialogTitle>
+          <div className="relative w-full h-[95vh] flex items-center justify-center overflow-hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4 z-50 text-white hover:bg-white/20"
+              onClick={closeImageModal}
+            >
+              <X className="h-6 w-6" />
+            </Button>
+            
+            <div className="absolute top-4 left-4 z-50 flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-white/20"
+                onClick={handleZoomIn}
+                disabled={zoom >= 3}
+              >
+                <ZoomIn className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-white/20"
+                onClick={handleZoomOut}
+                disabled={zoom <= 0.5}
+              >
+                <ZoomOut className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-white/20"
+                onClick={handleReset}
+              >
+                <RotateCw className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <div
+              className="w-full h-full flex items-center justify-center"
+              onWheel={handleWheel}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+            >
+              {selectedImage && (
+                <img
+                  ref={imageRef}
+                  src={selectedImage}
+                  alt="Zoomed image"
+                  className="max-w-full max-h-full object-contain select-none"
+                  style={{
+                    transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
+                    transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+                  }}
+                  draggable={false}
+                />
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

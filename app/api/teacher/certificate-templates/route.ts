@@ -16,10 +16,8 @@ export async function GET(req: NextRequest) {
       return new NextResponse("Forbidden - Teacher access required", { status: 403 });
     }
 
+    // All teachers can see all certificate templates regardless of creator
     const templates = await db.certificateTemplate.findMany({
-      where: {
-        teacherId: session.user.id,
-      },
       orderBy: {
         createdAt: "desc",
       },

@@ -7,6 +7,7 @@ const contentTypeMap: Record<string, string> = {
   "general-news": "GENERAL_NEWS",
   "about-lecturers": "ABOUT_LECTURERS",
   "goals-achievements": "GOALS_ACHIEVEMENTS",
+  "our-branches": "OUR_BRANCHES",
   "membership-job-request": "MEMBERSHIP_JOB_REQUEST",
   "renewal-request": "RENEWAL_REQUEST",
 };

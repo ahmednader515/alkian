@@ -23,6 +23,7 @@ export async function GET(
       "general-news": "GENERAL_NEWS",
       "about-lecturers": "ABOUT_LECTURERS",
       "goals-achievements": "GOALS_ACHIEVEMENTS",
+      "our-branches": "OUR_BRANCHES",
     };
 
     const dbType = typeMap[type];

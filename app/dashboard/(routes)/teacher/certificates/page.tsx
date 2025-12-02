@@ -64,6 +64,7 @@ export default function CertificatesPage() {
     title: "",
     description: "",
     fileUrl: "",
+    promoCode: "",
     maxDownloads: "",
     expiresAt: "",
   });
@@ -90,8 +91,8 @@ export default function CertificatesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.fileUrl) {
-      toast.error("العنوان وملف الشهادة مطلوبان");
+    if (!formData.title || !formData.fileUrl || !formData.promoCode) {
+      toast.error("العنوان وملف الشهادة ورمز الشهادة مطلوبان");
       return;
     }
 
@@ -115,13 +116,23 @@ export default function CertificatesPage() {
           title: "",
           description: "",
           fileUrl: "",
+          promoCode: "",
           maxDownloads: "",
           expiresAt: "",
         });
         setIsCreateDialogOpen(false);
         fetchCertificates();
       } else {
-        toast.error("حدث خطأ أثناء إنشاء الشهادة");
+        const errorText = await response.text();
+        let errorMessage = "حدث خطأ أثناء إنشاء الشهادة";
+        
+        if (errorText.includes("already in use")) {
+          errorMessage = "رمز الشهادة مستخدم بالفعل. يرجى اختيار رمز آخر";
+        } else if (errorText.includes("required")) {
+          errorMessage = "يرجى ملء جميع الحقول المطلوبة";
+        }
+        
+        toast.error(errorMessage);
       }
     } catch (error) {
       console.error("Error creating certificate:", error);
@@ -186,26 +197,27 @@ export default function CertificatesPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="flex items-center justify-between gap-3 sm:gap-4">
+        <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">
           إدارة الشهادات
         </h1>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#052c4b] hover:bg-[#052c4b]/90 text-white">
-              <Plus className="h-4 w-4 mr-2" />
-              إنشاء شهادة جديدة
+            <Button className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2 h-auto bg-[#052c4b] hover:bg-[#052c4b]/90 text-white">
+              <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">إنشاء شهادة جديدة</span>
+              <span className="sm:hidden">إنشاء</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>إنشاء شهادة جديدة</DialogTitle>
-              <DialogDescription>
-                قم بإنشاء شهادة جديدة وستحصل على رمز خصم فريد للمشاركة مع الطلاب
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+            <DialogHeader className="space-y-2">
+              <DialogTitle className="text-lg sm:text-xl">إنشاء شهادة جديدة</DialogTitle>
+              <DialogDescription className="text-sm">
+                قم بإنشاء شهادة جديدة وأدخل رمز الشهادة الفريد للمشاركة مع الطلاب
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="title">عنوان الشهادة *</Label>
                 <Input
@@ -226,6 +238,21 @@ export default function CertificatesPage() {
                   placeholder="وصف مختصر للشهادة..."
                   rows={3}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="promoCode">رمز الشهادة *</Label>
+                <Input
+                  id="promoCode"
+                  value={formData.promoCode}
+                  onChange={(e) => setFormData({ ...formData, promoCode: e.target.value.toUpperCase() })}
+                  placeholder="أدخل رمز الشهادة (مثال: CERT1234)"
+                  required
+                  className="font-mono"
+                />
+                <p className="text-xs text-muted-foreground">
+                  يجب أن يكون الرمز فريداً وغير مستخدم من قبل
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -261,11 +288,19 @@ export default function CertificatesPage() {
                 </div>
               </div>
 
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+              <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsCreateDialogOpen(false)}
+                  className="w-full sm:w-auto order-2 sm:order-1"
+                >
                   إلغاء
                 </Button>
-                <Button type="submit" className="bg-[#052c4b] hover:bg-[#052c4b]/90 text-white">
+                <Button 
+                  type="submit" 
+                  className="w-full sm:w-auto bg-[#052c4b] hover:bg-[#052c4b]/90 text-white order-1 sm:order-2"
+                >
                   إنشاء الشهادة
                 </Button>
               </DialogFooter>
@@ -274,7 +309,7 @@ export default function CertificatesPage() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {certificates.map((certificate) => (
           <Card key={certificate.id} className="relative">
             <CardHeader>
@@ -295,12 +330,13 @@ export default function CertificatesPage() {
                   <Input
                     value={certificate.promoCode}
                     readOnly
-                    className="font-mono text-sm"
+                    className="font-mono text-sm flex-1 min-w-0"
                   />
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => copyPromoCode(certificate.promoCode)}
+                    className="shrink-0"
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
@@ -329,18 +365,19 @@ export default function CertificatesPage() {
                 </div>
               )}
 
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={() => toggleCertificateStatus(certificate.id, certificate.isActive)}
+                  className="w-full sm:w-auto"
                 >
                   {certificate.isActive ? "إلغاء التفعيل" : "تفعيل"}
                 </Button>
                 
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button size="sm" variant="destructive">
+                    <Button size="sm" variant="destructive" className="w-full sm:w-auto">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </AlertDialogTrigger>

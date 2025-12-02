@@ -18,7 +18,8 @@ import {
   Users, 
   RefreshCw, 
   Target,
-  AlertCircle
+  AlertCircle,
+  MapPin
 } from "lucide-react";
 
 const services = [
@@ -117,6 +118,12 @@ const services = [
     title: "الكورسات المسجلة",
     icon: BookOpen,
     href: "/dashboard/my-courses",
+  },
+  {
+    id: "17",
+    title: "فروعنا",
+    icon: MapPin,
+    href: "/dashboard/content/our-branches",
   },
 ];
 

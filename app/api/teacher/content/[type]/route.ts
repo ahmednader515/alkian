@@ -8,6 +8,7 @@ const contentTypeMap: Record<string, string> = {
   "general-news": "GENERAL_NEWS",
   "about-lecturers": "ABOUT_LECTURERS",
   "goals-achievements": "GOALS_ACHIEVEMENTS",
+  "our-branches": "OUR_BRANCHES",
 };
 
 export async function GET(
@@ -29,12 +30,13 @@ export async function GET(
       return NextResponse.json({ error: "نوع المحتوى غير صحيح" }, { status: 400 });
     }
 
-    const content = await db.content.findUnique({
+    // Get the first available content of this type (all teachers can see all content)
+    const content = await db.content.findFirst({
       where: {
-        teacherId_type: {
-          teacherId: userId,
-          type: contentType,
-        },
+        type: contentType,
+      },
+      orderBy: {
+        updatedAt: "desc",
       },
     });
 

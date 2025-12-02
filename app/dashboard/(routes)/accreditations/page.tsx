@@ -1,17 +1,37 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Award } from "lucide-react";
 import Link from "next/link";
+import axios from "axios";
 
-const accreditations = [
-  "إعتماد كلية التدريب الدول البريطاني بإنجلترا",
-  "إعتماد اللجنه النقابية للعاملين بالمهن التجميليه",
-  "إعتماد محلي وترخيص مزاوله التدريب",
-];
+interface Accreditation {
+  id: string;
+  title: string;
+}
 
 export default function AccreditationsPage() {
+  const [accreditations, setAccreditations] = useState<Accreditation[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAccreditations();
+  }, []);
+
+  const fetchAccreditations = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get("/api/accreditations");
+      setAccreditations(response.data.accreditations || []);
+    } catch (error) {
+      console.error("Error fetching accreditations:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
@@ -24,18 +44,32 @@ export default function AccreditationsPage() {
         </Button>
       </div>
 
-      <div className="space-y-4">
-        {accreditations.map((accreditation, index) => (
-          <Card key={index}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-7 w-7 text-red-600" />
-                <span className="text-base">{accreditation}</span>
-              </CardTitle>
-            </CardHeader>
-          </Card>
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#052c4b]"></div>
+        </div>
+      ) : accreditations.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-muted-foreground text-lg">
+              لا توجد اعتمادات متاحة حالياً
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {accreditations.map((accreditation) => (
+            <Card key={accreditation.id}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-7 w-7 text-red-600" />
+                  <span className="text-base">{accreditation.title}</span>
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

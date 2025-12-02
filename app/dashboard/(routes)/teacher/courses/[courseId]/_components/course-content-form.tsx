@@ -122,7 +122,7 @@ export const CourseContentForm = ({
                         ) : (
                             <>
                                 <PlusCircle className="h-4 w-4 mr-2" />
-                                إضافة فصل
+                                إضافة فيديو
                             </>
                         )}
                     </Button>
@@ -159,37 +159,31 @@ export const CourseContentForm = ({
                     />
                 </div>
             )}
-            {!isCreating && courseItems.length > 0 && (
-                <>
-                    <p className="hidden md:block text-xs text-muted-foreground mt-4">
-                        قم بالسحب والإفلات لترتيب الفصول والاختبارات
-                    </p>
-                    {/* Mobile buttons - bottom */}
-                    <div className="md:hidden flex gap-2 mt-4 pt-4 border-t">
-                        <Button 
-                            onClick={() => router.push(`/dashboard/teacher/quizzes/create?courseId=${courseId}`)} 
-                            variant="ghost"
-                            className="flex-1"
-                        >
-                            <PlusCircle className="h-4 w-4 mr-2" />
-                            إضافة اختبار
-                        </Button>
-                        <Button 
-                            onClick={() => setIsCreating((current) => !current)} 
-                            variant="ghost"
-                            className="flex-1"
-                        >
-                            {isCreating ? (
-                                <>إلغاء</>
-                            ) : (
-                                <>
-                                    <PlusCircle className="h-4 w-4 mr-2" />
-                                    إضافة فصل
-                                </>
-                            )}
-                        </Button>
-                    </div>
-                </>
+            {courseItems.length > 0 && (
+                <p className="hidden md:block text-xs text-muted-foreground mt-4">
+                    قم بالسحب والإفلات لترتيب الفصول والاختبارات
+                </p>
+            )}
+            {/* Mobile buttons - bottom */}
+            {!isCreating && (
+                <div className="md:hidden flex gap-2 mt-4 pt-4 border-t">
+                    <Button 
+                        onClick={() => router.push(`/dashboard/teacher/quizzes/create?courseId=${courseId}`)} 
+                        variant="ghost"
+                        className="flex-1"
+                    >
+                        <PlusCircle className="h-4 w-4 mr-2" />
+                        إضافة اختبار
+                    </Button>
+                    <Button 
+                        onClick={() => setIsCreating((current) => !current)} 
+                        variant="ghost"
+                        className="flex-1"
+                    >
+                        <PlusCircle className="h-4 w-4 mr-2" />
+                        إضافة فيديو
+                    </Button>
+                </div>
             )}
         </div>
     );

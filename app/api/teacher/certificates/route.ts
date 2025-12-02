@@ -3,16 +3,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 
-// Generate a random promo code
-function generatePromoCode(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < 8; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
-
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -25,30 +15,25 @@ export async function POST(req: NextRequest) {
       return new NextResponse("Forbidden - Teacher access required", { status: 403 });
     }
 
-    const { title, description, fileUrl, maxDownloads, expiresAt } = await req.json();
+    const { title, description, fileUrl, promoCode, maxDownloads, expiresAt } = await req.json();
 
-    if (!title || !fileUrl) {
-      return new NextResponse("Title and file URL are required", { status: 400 });
+    if (!title || !fileUrl || !promoCode) {
+      return new NextResponse("Title, file URL, and promo code are required", { status: 400 });
     }
 
-    // Generate unique promo code
-    let promoCode;
-    let isUnique = false;
-    let attempts = 0;
+    // Validate and check if promo code is unique
+    const trimmedPromoCode = promoCode.trim().toUpperCase();
     
-    while (!isUnique && attempts < 10) {
-      promoCode = generatePromoCode();
-      const existing = await db.certificate.findUnique({
-        where: { promoCode }
-      });
-      if (!existing) {
-        isUnique = true;
-      }
-      attempts++;
+    if (trimmedPromoCode.length === 0) {
+      return new NextResponse("Promo code cannot be empty", { status: 400 });
     }
 
-    if (!isUnique) {
-      return new NextResponse("Failed to generate unique promo code", { status: 500 });
+    const existing = await db.certificate.findUnique({
+      where: { promoCode: trimmedPromoCode }
+    });
+
+    if (existing) {
+      return new NextResponse("This promo code is already in use. Please choose a different one.", { status: 400 });
     }
 
     // Create certificate
@@ -57,7 +42,7 @@ export async function POST(req: NextRequest) {
         title,
         description,
         fileUrl,
-        promoCode: promoCode!,
+        promoCode: trimmedPromoCode,
         teacherId: session.user.id,
         maxDownloads: maxDownloads ? parseInt(maxDownloads) : null,
         expiresAt: expiresAt ? new Date(expiresAt) : null,

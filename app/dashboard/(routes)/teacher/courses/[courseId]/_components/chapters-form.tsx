@@ -88,7 +88,7 @@ export const ChaptersForm = ({
                     ) : (
                         <>
                             <PlusCircle className="h-4 w-4 mr-2" />
-                            إضافة فصل
+                            إضافة فيديو
                         </>
                     )}
                 </Button>

@@ -56,8 +56,7 @@ export default async function CourseIdPage({
         course.title,
         course.description,
         course.imageUrl,
-        course.price,
-        course.chapters.some(chapter => chapter.isPublished)
+        course.price
     ];
 
     const totalFields = requiredFields.length;
@@ -72,8 +71,7 @@ export default async function CourseIdPage({
         title: !!course.title,
         description: !!course.description,
         imageUrl: !!course.imageUrl,
-        price: course.price !== null && course.price !== undefined,
-        publishedChapters: course.chapters.some(chapter => chapter.isPublished)
+        price: course.price !== null && course.price !== undefined
     };
 
     return (
@@ -111,10 +109,6 @@ export default async function CourseIdPage({
                                     <div className={`flex items-center gap-1 ${completionStatus.price ? 'text-green-600' : 'text-red-600'}`}>
                                         <span>{completionStatus.price ? '✓' : '✗'}</span>
                                         <span>السعر</span>
-                                    </div>
-                                    <div className={`flex items-center gap-1 ${completionStatus.publishedChapters ? 'text-green-600' : 'text-red-600'}`}>
-                                        <span>{completionStatus.publishedChapters ? '✓' : '✗'}</span>
-                                        <span>فصل منشور</span>
                                     </div>
                                 </div>
                             </div>

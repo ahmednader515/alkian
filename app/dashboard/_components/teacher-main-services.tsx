@@ -20,7 +20,9 @@ import {
     UserPlus,
     RefreshCw,
     AlertCircle,
-    Briefcase
+    Briefcase,
+    MapPin,
+    Globe
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -101,6 +103,11 @@ const services = [
         href: "/dashboard/teacher/content/goals-achievements",
     },
     {
+        icon: MapPin,
+        label: "فروعنا",
+        href: "/dashboard/teacher/content/our-branches",
+    },
+    {
         icon: Shield,
         label: "إنشاء حساب طالب",
         href: "/dashboard/teacher/create-account",
@@ -129,6 +136,21 @@ const services = [
         icon: Briefcase,
         label: "إدارة الخدمات",
         href: "/dashboard/teacher/services",
+    },
+    {
+        icon: GraduationCap,
+        label: "بيانات الشهادات",
+        href: "/dashboard/teacher/certificate-details",
+    },
+    {
+        icon: Award,
+        label: "الاعتمادات",
+        href: "/dashboard/teacher/accreditations",
+    },
+    {
+        icon: Globe,
+        label: "الخدمات العامة",
+        href: "/dashboard/teacher/general-services",
     },
 ];
 

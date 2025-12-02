@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
       "general-news": "GENERAL_NEWS",
       "about-lecturers": "ABOUT_LECTURERS",
       "goals-achievements": "GOALS_ACHIEVEMENTS",
+      "our-branches": "OUR_BRANCHES",
     };
 
     const dbType = typeMap[type];
@@ -36,9 +37,9 @@ export async function GET(req: NextRequest) {
       return new NextResponse("Invalid content type", { status: 400 });
     }
 
+    // All teachers can see all content items regardless of creator
     const items = await db.contentItem.findMany({
       where: {
-        teacherId: session.user.id,
         type: dbType,
       },
       orderBy: {
@@ -78,6 +79,7 @@ export async function POST(req: NextRequest) {
       "general-news": "GENERAL_NEWS",
       "about-lecturers": "ABOUT_LECTURERS",
       "goals-achievements": "GOALS_ACHIEVEMENTS",
+      "our-branches": "OUR_BRANCHES",
     };
 
     const dbType = typeMap[type];
