@@ -126,17 +126,7 @@ export async function PATCH(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        const courseOwner = await db.course.findUnique({
-            where: {
-                id: resolvedParams.courseId,
-                userId: userId,
-            }
-        });
-
-        if (!courseOwner) {
-            return new NextResponse("Unauthorized", { status: 401 });
-        }
-
+        // All teachers can edit chapters (no ownership check)
         const chapter = await db.chapter.update({
             where: {
                 id: resolvedParams.chapterId,
@@ -166,17 +156,7 @@ export async function DELETE(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        // Check if user owns the course
-        const courseOwner = await db.course.findUnique({
-            where: {
-                id: resolvedParams.courseId,
-                userId: userId,
-            }
-        });
-
-        if (!courseOwner) {
-            return new NextResponse("Unauthorized", { status: 401 });
-        }
+        // All teachers can delete chapters (no ownership check)
 
         // Check if chapter exists
         const existingChapter = await db.chapter.findUnique({

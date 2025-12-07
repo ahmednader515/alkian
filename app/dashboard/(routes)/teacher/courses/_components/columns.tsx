@@ -14,6 +14,11 @@ export type Course = {
     price: number;
     isPublished: boolean;
     createdAt: Date;
+    user?: {
+        id: string;
+        fullName: string | null;
+        phoneNumber: string;
+    };
 }
 
 export const columns: ColumnDef<Course>[] = [
@@ -87,6 +92,18 @@ export const columns: ColumnDef<Course>[] = [
         cell: ({ row }) => {
             const date = new Date(row.getValue("createdAt"));
             return <div>{format(date, "dd/MM/yyyy", { locale: ar })}</div>;
+        },
+    },
+    {
+        id: "createdBy",
+        header: "أنشئ بواسطة",
+        cell: ({ row }) => {
+            const user = row.original.user;
+            return (
+                <div className="text-sm">
+                    {user?.fullName || user?.phoneNumber || "غير معروف"}
+                </div>
+            );
         },
     }
 ]; 

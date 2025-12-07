@@ -128,6 +128,11 @@ export function CoursesTable<TData extends { id: string }, TValue>({
                                         <div className="text-sm text-muted-foreground">
                                             تاريخ الإنشاء: {format(new Date(course.createdAt), "dd/MM/yyyy", { locale: ar })}
                                         </div>
+                                        {(course as any).user && (
+                                            <div className="text-sm text-muted-foreground">
+                                                أنشئ بواسطة: {(course as any).user.fullName || (course as any).user.phoneNumber || "غير معروف"}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <Badge variant={course.isPublished ? "default" : "secondary"}>

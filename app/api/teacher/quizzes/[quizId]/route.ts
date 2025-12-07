@@ -17,16 +17,9 @@ export async function GET(
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // Get the quiz; if not admin, ensure it belongs to the teacher
+        // All teachers can view quizzes (no ownership check)
         const quiz = await db.quiz.findFirst({
-            where: user?.role === "ADMIN"
-                ? { id: resolvedParams.quizId }
-                : {
-                    id: resolvedParams.quizId,
-                    course: {
-                        userId: userId,
-                    },
-                },
+            where: { id: resolvedParams.quizId },
             include: {
                 course: {
                     select: {
@@ -99,20 +92,17 @@ export async function PATCH(
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // Get the current quiz to know its course and owner
+        // Get the current quiz to know its course
         const currentQuiz = await db.quiz.findUnique({
             where: { id: resolvedParams.quizId },
-            select: { courseId: true, position: true, course: { select: { userId: true } } }
+            select: { courseId: true, position: true }
         });
 
         if (!currentQuiz) {
             return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
         }
 
-        // Only owner or admin can modify
-        if (user?.role !== "ADMIN" && currentQuiz.course.userId !== userId) {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
+        // All teachers can edit quizzes (no ownership check)
 
         // Use the courseId from request if provided, otherwise use current quiz's courseId
         const targetCourseId = courseId || currentQuiz.courseId;

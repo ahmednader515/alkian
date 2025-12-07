@@ -81,16 +81,16 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Course ID is required" }, { status: 400 });
         }
 
-        // Verify the course belongs to the teacher
+        // All teachers can create quizzes (no ownership check)
+        // Verify course exists
         const course = await db.course.findUnique({
             where: {
-                id: courseId,
-                userId: userId
+                id: courseId
             }
         });
 
         if (!course) {
-            return NextResponse.json({ error: "Course not found or unauthorized" }, { status: 404 });
+            return NextResponse.json({ error: "Course not found" }, { status: 404 });
         }
 
         // Get the next position if not provided

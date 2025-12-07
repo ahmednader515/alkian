@@ -50,15 +50,16 @@ export async function POST(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        const courseOwner = await db.course.findUnique({
+        // All teachers can create chapters (no ownership check)
+        // Verify course exists
+        const course = await db.course.findUnique({
             where: {
                 id: resolvedParams.courseId,
-                userId: userId,
             }
         });
 
-        if (!courseOwner) {
-            return new NextResponse("Unauthorized", { status: 401 });
+        if (!course) {
+            return new NextResponse("Course not found", { status: 404 });
         }
 
         const lastChapter = await db.chapter.findFirst({

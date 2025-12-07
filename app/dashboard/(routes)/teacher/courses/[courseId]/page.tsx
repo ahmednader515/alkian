@@ -47,10 +47,8 @@ export default async function CourseIdPage({
         return redirect("/");
     }
 
-    // Only owner or admin can view editor
-    if (user?.role !== "ADMIN" && course.userId !== userId) {
-        return redirect("/dashboard");
-    }
+    // All teachers can view and edit courses
+    // No ownership check needed
 
     const requiredFields = [
         course.title,

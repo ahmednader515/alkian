@@ -14,15 +14,16 @@ export async function POST(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        const courseOwner = await db.course.findUnique({
+        // All teachers can add attachments (no ownership check)
+        // Verify course exists
+        const course = await db.course.findUnique({
             where: {
                 id: resolvedParams.courseId,
-                userId,
             }
         });
 
-        if (!courseOwner) {
-            return new NextResponse("Unauthorized", { status: 401 });
+        if (!course) {
+            return new NextResponse("Course not found", { status: 404 });
         }
 
         const { url, name } = await req.json();
@@ -75,17 +76,7 @@ export async function GET(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        const courseOwner = await db.course.findUnique({
-            where: {
-                id: resolvedParams.courseId,
-                userId,
-            }
-        });
-
-        if (!courseOwner) {
-            return new NextResponse("Unauthorized", { status: 401 });
-        }
-
+        // All teachers can view attachments (no ownership check)
         const attachments = await db.chapterAttachment.findMany({
             where: {
                 chapterId: resolvedParams.chapterId,

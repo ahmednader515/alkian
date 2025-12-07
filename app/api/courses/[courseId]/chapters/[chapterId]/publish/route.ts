@@ -14,17 +14,7 @@ export async function PATCH(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        const courseOwner = await db.course.findUnique({
-            where: {
-                id: resolvedParams.courseId,
-                userId,
-            }
-        });
-
-        if (!courseOwner) {
-            return new NextResponse("Unauthorized", { status: 401 });
-        }
-
+        // All teachers can publish chapters (no ownership check)
         const chapter = await db.chapter.findUnique({
             where: {
                 id: resolvedParams.chapterId,

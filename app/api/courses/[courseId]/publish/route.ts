@@ -14,10 +14,10 @@ export async function PATCH(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
+        // All teachers can publish courses (no ownership check)
         const course = await db.course.findUnique({
             where: {
-                id: resolvedParams.courseId,
-                userId
+                id: resolvedParams.courseId
             },
             include: {
                 chapters: true
@@ -34,8 +34,7 @@ export async function PATCH(
 
         const publishedCourse = await db.course.update({
             where: {
-                id: resolvedParams.courseId,
-                userId
+                id: resolvedParams.courseId
             },
             data: {
                 isPublished: !course.isPublished

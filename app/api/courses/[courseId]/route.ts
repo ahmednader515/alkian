@@ -69,12 +69,9 @@ export async function PATCH(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        const whereClause = user?.role === "ADMIN"
-            ? { id: resolvedParams.courseId }
-            : { id: resolvedParams.courseId, userId };
-
+        // All teachers can edit courses (no ownership check)
         const course = await db.course.update({
-            where: whereClause,
+            where: { id: resolvedParams.courseId },
             data: {
                 ...values,
             }
