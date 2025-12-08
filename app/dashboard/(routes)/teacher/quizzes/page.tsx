@@ -14,12 +14,12 @@ interface Quiz {
     id: string;
     title: string;
     description: string;
-    courseId: string;
+    courseId: string | null;
     position: number;
     isPublished: boolean;
     course: {
         title: string;
-    };
+    } | null;
     questions: Question[];
     createdAt: string;
     updatedAt: string;
@@ -67,7 +67,12 @@ const QuizzesPage = () => {
 
         setIsDeleting(quiz.id);
         try {
-            const response = await fetch(`/api/courses/${quiz.courseId}/quizzes/${quiz.id}`, {
+            // Use different route for standalone quizzes vs course quizzes
+            const deleteUrl = quiz.courseId 
+                ? `/api/courses/${quiz.courseId}/quizzes/${quiz.id}`
+                : `/api/teacher/quizzes/${quiz.id}`;
+            
+            const response = await fetch(deleteUrl, {
                 method: "DELETE",
             });
 
@@ -91,7 +96,7 @@ const QuizzesPage = () => {
 
     const filteredQuizzes = quizzes.filter(quiz =>
         quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        quiz.course.title.toLowerCase().includes(searchTerm.toLowerCase())
+        (quiz.course && quiz.course.title.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     if (loading) {
@@ -138,9 +143,15 @@ const QuizzesPage = () => {
                                             <h3 className="font-semibold text-lg">{quiz.title}</h3>
                                             <div className="mt-2 space-y-1">
                                                 <div className="text-sm">
-                                                    <Badge variant="outline" className="mr-2">
-                                                        {quiz.course.title}
-                                                    </Badge>
+                                                    {quiz.course ? (
+                                                        <Badge variant="outline" className="mr-2">
+                                                            {quiz.course.title}
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge variant="secondary" className="mr-2">
+                                                            مستقل
+                                                        </Badge>
+                                                    )}
                                                 </div>
                                                 <div className="text-sm text-muted-foreground">
                                                     الموقع: <Badge variant="secondary">{quiz.position}</Badge>
@@ -247,9 +258,15 @@ const QuizzesPage = () => {
                                             {quiz.title}
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant="outline">
-                                                {quiz.course.title}
-                                            </Badge>
+                                            {quiz.course ? (
+                                                <Badge variant="outline">
+                                                    {quiz.course.title}
+                                                </Badge>
+                                            ) : (
+                                                <Badge variant="secondary">
+                                                    مستقل
+                                                </Badge>
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant="secondary">

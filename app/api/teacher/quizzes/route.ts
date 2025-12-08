@@ -11,12 +11,9 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        // Get all quizzes - both standalone (courseId is null) and from all courses
+        // All teachers can see all quizzes
         const quizzes = await db.quiz.findMany({
-            where: {
-                course: {
-                    userId: userId
-                }
-            },
             include: {
                 course: {
                     select: {
@@ -41,7 +38,7 @@ export async function GET(req: Request) {
                 }
             },
             orderBy: {
-                position: "asc"
+                createdAt: "desc"
             }
         });
 
@@ -66,8 +63,6 @@ export async function POST(req: Request) {
         const { userId } = await auth();
         const { title, description, courseId, questions, position, timer, maxAttempts } = await req.json();
 
-        console.log("Received position:", position, "Type:", typeof position);
-
         if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
@@ -77,38 +72,31 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Title is required" }, { status: 400 });
         }
 
-        if (!courseId) {
-            return NextResponse.json({ error: "Course ID is required" }, { status: 400 });
-        }
+        // courseId is now optional - quizzes can be standalone
+        if (courseId) {
+            // Verify course exists if provided
+            const course = await db.course.findUnique({
+                where: {
+                    id: courseId
+                }
+            });
 
-        // All teachers can create quizzes (no ownership check)
-        // Verify course exists
-        const course = await db.course.findUnique({
-            where: {
-                id: courseId
+            if (!course) {
+                return NextResponse.json({ error: "Course not found" }, { status: 404 });
             }
-        });
-
-        if (!course) {
-            return NextResponse.json({ error: "Course not found" }, { status: 404 });
         }
 
         // Get the next position if not provided
         let quizPosition = position;
-        console.log("Initial quizPosition:", quizPosition);
         if (!quizPosition || quizPosition <= 0) {
             const lastQuiz = await db.quiz.findFirst({
-                where: {
-                    courseId: courseId
-                },
+                where: courseId ? { courseId } : { courseId: null },
                 orderBy: {
                     position: 'desc'
                 }
             });
             quizPosition = lastQuiz ? lastQuiz.position + 1 : 1;
-            console.log("Calculated quizPosition:", quizPosition, "Last quiz position:", lastQuiz?.position);
         }
-        console.log("Final quizPosition:", quizPosition);
 
         // Validate questions
         if (!questions || questions.length === 0) {
@@ -131,19 +119,7 @@ export async function POST(req: Request) {
                 if (validOptions.length < 2) {
                     return NextResponse.json({ error: `Question ${i + 1}: At least 2 valid options are required` }, { status: 400 });
                 }
-
-                // For multiple choice, correctAnswer should be an index
-                if (typeof question.correctAnswer !== 'number' || question.correctAnswer < 0 || question.correctAnswer >= validOptions.length) {
-                    return NextResponse.json({ error: `Question ${i + 1}: Valid correct answer index is required` }, { status: 400 });
-                }
-            } else if (question.type === "TRUE_FALSE") {
-                if (!question.correctAnswer || (question.correctAnswer !== "true" && question.correctAnswer !== "false")) {
-                    return NextResponse.json({ error: `Question ${i + 1}: Correct answer must be "true" or "false"` }, { status: 400 });
-                }
-            } else if (question.type === "SHORT_ANSWER") {
-                if (!question.correctAnswer || !question.correctAnswer.toString().trim()) {
-                    return NextResponse.json({ error: `Question ${i + 1}: Correct answer is required` }, { status: 400 });
-                }
+                // correctAnswer is now optional - no validation needed
             }
 
             if (!question.points || question.points <= 0) {
@@ -151,63 +127,18 @@ export async function POST(req: Request) {
             }
         }
 
-        // Create the quiz
-        console.log("Creating quiz with position:", quizPosition);
-        console.log("Quiz data object:", {
-            title,
-            description,
-            position: quizPosition,
-            courseId,
-            timer: timer || null,
-            maxAttempts: maxAttempts || 1
-        });
-        
+        // Create the quiz (courseId is optional)
         const quizData = {
             title,
             description,
-            position: Number(quizPosition), // Explicitly cast to number
-            courseId,
-            timer: timer || null, // Timer in minutes, null means no time limit
-            maxAttempts: maxAttempts || 1, // Default to 1 attempt if not specified
-                            questions: {
-                    create: questions.map((question: any, index: number) => {
-                        let correctAnswerValue = question.correctAnswer;
-                        
-                        // For multiple choice questions, convert index to actual option value
-                        if (question.type === "MULTIPLE_CHOICE") {
-                            const validOptions = question.options.filter((option: string) => option && option.trim() !== "");
-                            correctAnswerValue = validOptions[question.correctAnswer];
-                        }
-                        
-                        return {
-                            text: question.text,
-                            type: question.type,
-                            options: question.type === "MULTIPLE_CHOICE" ? stringifyQuizOptions(question.options) : null,
-                            correctAnswer: correctAnswerValue,
-                            points: question.points,
-                            imageUrl: question.imageUrl || null,
-                            position: index + 1
-                        };
-                    })
-                }
-        };
-        
-        console.log("Final quiz data:", JSON.stringify(quizData, null, 2));
-        
-        // Try creating the quiz without questions first
-        const quizDataWithoutQuestions = {
-            title,
-            description,
             position: Number(quizPosition),
-            courseId,
+            courseId: courseId || null, // Optional - quizzes can be standalone
             timer: timer || null,
             maxAttempts: maxAttempts || 1
         };
         
-        console.log("Quiz data without questions:", JSON.stringify(quizDataWithoutQuestions, null, 2));
-        
         const quiz = await db.quiz.create({
-            data: quizDataWithoutQuestions,
+            data: quizData,
             include: {
                 course: {
                     select: {
@@ -217,23 +148,25 @@ export async function POST(req: Request) {
             }
         });
         
-        // Now add the questions separately
+        // Now add the questions separately (correctAnswer is optional)
         if (questions.length > 0) {
             await db.question.createMany({
                 data: questions.map((question: any, index: number) => {
-                    let correctAnswerValue = question.correctAnswer;
+                    let correctAnswerValue = question.correctAnswer || null;
                     
-                    // For multiple choice questions, convert index to actual option value
-                    if (question.type === "MULTIPLE_CHOICE") {
+                    // For multiple choice questions, convert index to actual option value if correctAnswer is provided
+                    if (question.type === "MULTIPLE_CHOICE" && typeof question.correctAnswer === 'number') {
                         const validOptions = question.options.filter((option: string) => option && option.trim() !== "");
-                        correctAnswerValue = validOptions[question.correctAnswer];
+                        if (question.correctAnswer >= 0 && question.correctAnswer < validOptions.length) {
+                            correctAnswerValue = validOptions[question.correctAnswer];
+                        }
                     }
                     
                     return {
                         text: question.text,
                         type: question.type,
                         options: question.type === "MULTIPLE_CHOICE" ? stringifyQuizOptions(question.options) : null,
-                        correctAnswer: correctAnswerValue,
+                        correctAnswer: correctAnswerValue, // Optional - no automatic grading
                         points: question.points,
                         imageUrl: question.imageUrl || null,
                         quizId: quiz.id,

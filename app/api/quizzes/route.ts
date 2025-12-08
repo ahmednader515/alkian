@@ -11,12 +11,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
-    // Get all quizzes from all courses (show to everyone regardless of publish status)
+    // Get all published quizzes - both standalone and from published courses
     const quizzes = await db.quiz.findMany({
       where: {
-        course: {
-          isPublished: true, // Only show quizzes from published courses
-        },
+        isPublished: true,
+        OR: [
+          { courseId: null }, // Standalone quizzes (always free)
+          {
+            course: {
+              isPublished: true, // Quizzes from published courses
+            },
+          },
+        ],
       },
       include: {
         course: {
@@ -37,13 +43,30 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Check purchase status for each course
+    // Check purchase status and submission status for each quiz
     const quizzesWithPurchaseStatus = await Promise.all(
       quizzes.map(async (quiz) => {
-        // Check if course is free (price is 0 or null)
+        // Check if user has submitted this quiz
+        const hasSubmitted = await db.quizResult.findFirst({
+          where: {
+            studentId: userId,
+            quizId: quiz.id,
+          },
+        }).then(result => !!result);
+
+        // Standalone quizzes are always free and accessible
+        if (!quiz.courseId || !quiz.course) {
+          return {
+            ...quiz,
+            hasPurchased: true, // Always accessible
+            isStandalone: true,
+            hasSubmitted,
+          };
+        }
+
+        // For course quizzes, check if course is free or if user has purchased
         const isFree = !quiz.course.price || quiz.course.price === 0;
         
-        // Check if user has purchased the course
         let hasPurchased = isFree;
         if (!isFree) {
           const purchase = await db.purchase.findUnique({
@@ -60,6 +83,8 @@ export async function GET(req: NextRequest) {
         return {
           ...quiz,
           hasPurchased,
+          isStandalone: false,
+          hasSubmitted,
         };
       })
     );

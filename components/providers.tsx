@@ -32,7 +32,7 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
         <RTLProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="light"
+            forcedTheme="light"
             enableSystem={false}
             disableTransitionOnChange
           >

@@ -162,8 +162,8 @@ model Quiz {
     isPublished Boolean @default(false)
     timer Int? // Timer in minutes, null means no time limit
     maxAttempts Int @default(1) // Maximum number of attempts allowed
-    courseId String
-    course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+    courseId String? // Optional - quizzes can be standalone
+    course Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
     questions Question[]
     quizResults QuizResult[]
     createdAt DateTime @default(now())
@@ -177,7 +177,7 @@ model Question {
     text String @db.Text
     type String // "MULTIPLE_CHOICE", "TRUE_FALSE", "SHORT_ANSWER"
     options String? @db.Text // JSON string for multiple choice options
-    correctAnswer String @db.Text
+    correctAnswer String? @db.Text // Optional - no automatic grading
     points Int @default(1)
     imageUrl String? @db.Text
     position Int @default(1)
@@ -194,9 +194,9 @@ model QuizResult {
     id String @id @default(uuid())
     studentId String
     quizId String
-    score Int
-    totalPoints Int
-    percentage Float
+    score Int? // Optional - no automatic grading
+    totalPoints Int? // Optional - no automatic grading
+    percentage Float? // Optional - no automatic grading
     attemptNumber Int @default(1) // Track which attempt this is
     submittedAt DateTime @default(now())
     user User @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -214,9 +214,9 @@ model QuizAnswer {
     questionId String
     quizResultId String
     studentAnswer String @db.Text
-    correctAnswer String @db.Text
-    isCorrect Boolean
-    pointsEarned Int
+    correctAnswer String? @db.Text // Optional - no automatic grading
+    isCorrect Boolean? // Optional - no automatic grading
+    pointsEarned Int? // Optional - no automatic grading
     question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
     quizResult QuizResult @relation(fields: [quizResultId], references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())

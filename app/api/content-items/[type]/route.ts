@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
 
-// GET all content items for a specific type (public endpoint for students)
+// GET all content items for a specific type (public endpoint)
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ type: string }> }
 ) {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
     const resolvedParams = await params;
     const type = resolvedParams.type;
 

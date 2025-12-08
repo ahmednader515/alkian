@@ -13,15 +13,17 @@ interface Quiz {
   id: string;
   title: string;
   description: string | null;
-  courseId: string;
+  courseId: string | null;
   course: {
     id: string;
     title: string;
     price?: number | null;
-  };
+  } | null;
   questions: { id: string }[];
   createdAt: string;
   hasPurchased: boolean;
+  isStandalone?: boolean;
+  hasSubmitted?: boolean;
 }
 
 export default function TestsPage() {
@@ -106,20 +108,37 @@ export default function TestsPage() {
                 )}
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center gap-2 text-sm">
-                  <BookOpen className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">{quiz.course.title}</span>
-                </div>
+                {quiz.course && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">{quiz.course.title}</span>
+                  </div>
+                )}
+                {quiz.isStandalone && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      مجاني
+                    </Badge>
+                  </div>
+                )}
                 <div className="flex items-center justify-between">
                   <Badge variant="secondary">
                     {quiz.questions.length} {quiz.questions.length === 1 ? "سؤال" : "أسئلة"}
                   </Badge>
                   {quiz.hasPurchased ? (
-                    <Button asChild size="sm" className="bg-[#052c4b] hover:bg-[#052c4b]/90">
-                      <Link href={`/courses/${quiz.courseId}/quizzes/${quiz.id}`}>
-                        بدء الاختبار
-                      </Link>
-                    </Button>
+                    quiz.hasSubmitted ? (
+                      <Button asChild size="sm" variant="outline" className="border-[#052c4b] text-[#052c4b] hover:bg-[#052c4b]/10">
+                        <Link href={quiz.isStandalone ? `/quizzes/${quiz.id}/result` : `/courses/${quiz.courseId}/quizzes/${quiz.id}/result`}>
+                          عرض إجاباتك
+                        </Link>
+                      </Button>
+                    ) : (
+                      <Button asChild size="sm" className="bg-[#052c4b] hover:bg-[#052c4b]/90">
+                        <Link href={quiz.isStandalone ? `/quizzes/${quiz.id}` : `/courses/${quiz.courseId}/quizzes/${quiz.id}`}>
+                          بدء الاختبار
+                        </Link>
+                      </Button>
+                    )
                   ) : (
                     <Button asChild size="sm" className="bg-red-600 hover:bg-red-700">
                       <Link href={`/courses/${quiz.courseId}/purchase`}>

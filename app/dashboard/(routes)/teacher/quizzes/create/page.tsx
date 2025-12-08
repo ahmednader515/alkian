@@ -8,39 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, GripVertical, X } from "lucide-react";
+import { Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { UploadDropzone } from "@/lib/uploadthing";
-
-interface Course {
-    id: string;
-    title: string;
-    isPublished: boolean;
-}
-
-interface Chapter {
-    id: string;
-    title: string;
-    position: number;
-    isPublished: boolean;
-}
-
-interface Quiz {
-    id: string;
-    title: string;
-    description: string;
-    courseId: string;
-    position: number;
-    isPublished: boolean;
-    course: {
-        title: string;
-    };
-    questions: Question[];
-    createdAt: string;
-    updatedAt: string;
-}
 
 interface Question {
     id: string;
@@ -48,125 +19,24 @@ interface Question {
     imageUrl?: string;
     type: "MULTIPLE_CHOICE" | "TRUE_FALSE" | "SHORT_ANSWER";
     options?: string[];
-    correctAnswer: string | number; // Can be string for TRUE_FALSE/SHORT_ANSWER or number for MULTIPLE_CHOICE
+    correctAnswer?: string | number; // Optional - no automatic grading
     points: number;
-}
-
-interface CourseItem {
-    id: string;
-    title: string;
-    type: "chapter" | "quiz";
-    position: number;
-    isPublished: boolean;
 }
 
 const CreateQuizPage = () => {
     const router = useRouter();
-    const [courses, setCourses] = useState<Course[]>([]);
-    const [selectedCourse, setSelectedCourse] = useState<string>("");
     const [quizTitle, setQuizTitle] = useState("");
     const [quizDescription, setQuizDescription] = useState("");
     const [quizTimer, setQuizTimer] = useState<number | null>(null);
     const [quizMaxAttempts, setQuizMaxAttempts] = useState<number>(1);
     const [questions, setQuestions] = useState<Question[]>([]);
-    const [selectedPosition, setSelectedPosition] = useState<number>(1);
-    const [courseItems, setCourseItems] = useState<CourseItem[]>([]);
-    const [chapters, setChapters] = useState<Chapter[]>([]);
-    const [isLoadingCourseItems, setIsLoadingCourseItems] = useState(false);
     const [isCreatingQuiz, setIsCreatingQuiz] = useState(false);
     const [uploadingImages, setUploadingImages] = useState<{ [key: string]: boolean }>({});
 
-    useEffect(() => {
-        fetchCourses();
-        
-        // Check if courseId is provided in URL params
-        const urlParams = new URLSearchParams(window.location.search);
-        const courseIdFromUrl = urlParams.get('courseId');
-        if (courseIdFromUrl) {
-            setSelectedCourse(courseIdFromUrl);
-            fetchCourseItems(courseIdFromUrl);
-        }
-    }, []);
-
-    const fetchCourses = async () => {
-        try {
-            const response = await fetch("/api/courses");
-            if (response.ok) {
-                const data = await response.json();
-                const teacherCourses = data.filter((course: Course) => course.isPublished);
-                setCourses(teacherCourses);
-            }
-        } catch (error) {
-            console.error("Error fetching courses:", error);
-        }
-    };
-
-    const fetchCourseItems = async (courseId: string) => {
-        try {
-            setIsLoadingCourseItems(true);
-            // Clear existing items first
-            setCourseItems([]);
-            
-            const [chaptersResponse, quizzesResponse] = await Promise.all([
-                fetch(`/api/courses/${courseId}/chapters`),
-                fetch(`/api/courses/${courseId}/quizzes`)
-            ]);
-            
-            const chaptersData = chaptersResponse.ok ? await chaptersResponse.json() : [];
-            const quizzesData = quizzesResponse.ok ? await quizzesResponse.json() : [];
-            
-            // Combine chapters and existing quizzes for display
-            const items: CourseItem[] = [
-                ...chaptersData.map((chapter: Chapter) => ({
-                    id: chapter.id,
-                    title: chapter.title,
-                    type: "chapter" as const,
-                    position: chapter.position,
-                    isPublished: chapter.isPublished
-                })),
-                ...quizzesData.map((quiz: Quiz) => ({
-                    id: quiz.id,
-                    title: quiz.title,
-                    type: "quiz" as const,
-                    position: quiz.position,
-                    isPublished: quiz.isPublished
-                }))
-            ];
-            
-            // Sort by position
-            items.sort((a, b) => a.position - b.position);
-            
-            // Add the new quiz item to the end of the list
-            const itemsWithNewQuiz = [
-                ...items,
-                {
-                    id: "new-quiz",
-                    title: quizTitle || "اختبار جديد",
-                    type: "quiz" as const,
-                    position: items.length + 1,
-                    isPublished: false
-                }
-            ];
-            
-            setCourseItems(itemsWithNewQuiz);
-            setChapters(chaptersData);
-            
-            // Set the new quiz position to be the last position by default
-            const lastPosition = items.length + 1;
-            setSelectedPosition(lastPosition);
-        } catch (error) {
-            console.error("Error fetching course items:", error);
-            // Clear items on error
-            setCourseItems([]);
-            setSelectedPosition(1);
-        } finally {
-            setIsLoadingCourseItems(false);
-        }
-    };
 
     const handleCreateQuiz = async () => {
-        if (!selectedCourse || !quizTitle.trim()) {
-            toast.error("يرجى إدخال جميع البيانات المطلوبة");
+        if (!quizTitle.trim()) {
+            toast.error("يرجى إدخال عنوان الاختبار");
             return;
         }
 
@@ -182,27 +52,11 @@ const CreateQuizPage = () => {
                 continue;
             }
 
-            // Validate correct answer
+            // Validate question options (correctAnswer is optional - no automatic grading)
             if (question.type === "MULTIPLE_CHOICE") {
                 const validOptions = question.options?.filter(option => option.trim() !== "") || [];
-                if (validOptions.length === 0) {
-                    validationErrors.push(`السؤال ${i + 1}: يجب إضافة خيار واحد على الأقل`);
-                    continue;
-                }
-                
-                // Check if correct answer index is valid
-                if (typeof question.correctAnswer !== 'number' || question.correctAnswer < 0 || question.correctAnswer >= validOptions.length) {
-                    validationErrors.push(`السؤال ${i + 1}: يجب اختيار إجابة صحيحة`);
-                    continue;
-                }
-            } else if (question.type === "TRUE_FALSE") {
-                if (!question.correctAnswer || (question.correctAnswer !== "true" && question.correctAnswer !== "false")) {
-                    validationErrors.push(`السؤال ${i + 1}: يجب اختيار إجابة صحيحة`);
-                    continue;
-                }
-            } else if (question.type === "SHORT_ANSWER") {
-                if (!question.correctAnswer || question.correctAnswer.toString().trim() === "") {
-                    validationErrors.push(`السؤال ${i + 1}: الإجابة الصحيحة مطلوبة`);
+                if (validOptions.length < 2) {
+                    validationErrors.push(`السؤال ${i + 1}: يجب إضافة خيارين على الأقل`);
                     continue;
                 }
             }
@@ -248,9 +102,9 @@ const CreateQuizPage = () => {
                 body: JSON.stringify({
                     title: quizTitle,
                     description: quizDescription,
-                    courseId: selectedCourse,
+                    courseId: null, // Standalone quiz - no course required
                     questions: cleanedQuestions,
-                    position: selectedPosition,
+                    position: 1, // Position not needed for standalone quizzes
                     timer: quizTimer,
                     maxAttempts: quizMaxAttempts,
                 }),
@@ -277,7 +131,7 @@ const CreateQuizPage = () => {
             text: "",
             type: "MULTIPLE_CHOICE",
             options: ["", "", "", ""],
-            correctAnswer: 0, // Use index 0 for first option
+            correctAnswer: undefined, // Optional - no automatic grading
             points: 1,
         };
         setQuestions([...questions, newQuestion]);
@@ -294,25 +148,6 @@ const CreateQuizPage = () => {
         setQuestions(updatedQuestions);
     };
 
-    const handleDragEnd = (result: any) => {
-        if (!result.destination) return;
-
-        // Only handle dragging the "new-quiz" item
-        if (result.draggableId === "new-quiz") {
-            // Calculate the position for the new quiz based on where it was dropped
-            const newQuizPosition = result.destination.index + 1;
-            setSelectedPosition(newQuizPosition);
-            
-            // Reorder the items array to reflect the new position
-            const reorderedItems = Array.from(courseItems);
-            const [movedItem] = reorderedItems.splice(result.source.index, 1);
-            reorderedItems.splice(result.destination.index, 0, movedItem);
-            
-            setCourseItems(reorderedItems);
-        }
-        // For existing items, we don't want to reorder them, so we ignore the drag
-        // The drag and drop library will handle the visual feedback, but we don't update state
-    };
 
     return (
         <div className="p-6 space-y-6">
@@ -326,134 +161,15 @@ const CreateQuizPage = () => {
             </div>
 
             <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label>اختر الكورس</Label>
-                        <Select value={selectedCourse} onValueChange={(value) => {
-                            setSelectedCourse(value);
-                            // Clear previous data immediately
-                            setCourseItems([]);
-                            setSelectedPosition(1);
-                            if (value) {
-                                fetchCourseItems(value);
-                            }
-                        }}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="اختر كورس..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {courses.map((course) => (
-                                    <SelectItem key={course.id} value={course.id}>
-                                        {course.title}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-2">
-                        <Label>عنوان الاختبار</Label>
-                        <Input
-                            value={quizTitle}
-                            onChange={(e) => {
-                                setQuizTitle(e.target.value);
-                                // Update the new quiz item in the course items list
-                                setCourseItems(prev => 
-                                    prev.map(item => 
-                                        item.id === "new-quiz" 
-                                            ? { ...item, title: e.target.value || "اختبار جديد" }
-                                            : item
-                                    )
-                                );
-                            }}
-                            placeholder="أدخل عنوان الاختبار"
-                        />
-                    </div>
+                <div className="space-y-2">
+                    <Label>عنوان الاختبار</Label>
+                    <Input
+                        value={quizTitle}
+                        onChange={(e) => setQuizTitle(e.target.value)}
+                        placeholder="أدخل عنوان الاختبار"
+                    />
                 </div>
 
-                {selectedCourse && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>ترتيب الاختبار في الكورس</CardTitle>
-                            <p className="text-sm text-muted-foreground">
-                                اسحب الاختبار الجديد إلى الموقع المطلوب بين الفصول والاختبارات الموجودة
-                            </p>
-                            <p className="text-sm text-blue-600">
-                                الموقع المحدد: {selectedPosition}
-                            </p>
-                        </CardHeader>
-                        <CardContent>
-                            {isLoadingCourseItems ? (
-                                <div className="text-center py-8">
-                                    <div className="text-muted-foreground">جاري تحميل محتوى الكورس...</div>
-                                </div>
-                            ) : courseItems.length > 0 ? (
-                                <DragDropContext onDragEnd={handleDragEnd}>
-                                    <Droppable droppableId="course-items">
-                                        {(provided) => (
-                                            <div
-                                                {...provided.droppableProps}
-                                                ref={provided.innerRef}
-                                                className="space-y-2"
-                                            >
-                                                {courseItems.map((item, index) => (
-                                                    <Draggable key={item.id} draggableId={item.id} index={index}>
-                                                        {(provided, snapshot) => (
-                                                            <div
-                                                                ref={provided.innerRef}
-                                                                {...provided.draggableProps}
-                                                                className={`p-3 border rounded-lg flex items-center justify-between ${
-                                                                    snapshot.isDragging ? "bg-blue-50" : "bg-white"
-                                                                } ${item.id === "new-quiz" ? "border-2 border-dashed border-blue-300 bg-blue-50" : ""}`}
-                                                            >
-                                                                <div className="flex items-center space-x-3">
-                                                                    <div {...provided.dragHandleProps} className={item.id === "new-quiz" ? "cursor-grab active:cursor-grabbing" : ""}>
-                                                                        <GripVertical className={`h-4 w-4 ${item.id === "new-quiz" ? "text-blue-600" : "text-gray-300 cursor-not-allowed"}`} />
-                                                                    </div>
-                                                                    <div>
-                                                                        <div className={`font-medium ${item.id === "new-quiz" ? "text-blue-800" : ""}`}>
-                                                                            {item.title}
-                                                                        </div>
-                                                                        <div className={`text-sm ${item.id === "new-quiz" ? "text-blue-600" : "text-muted-foreground"}`}>
-                                                                            {item.type === "chapter" ? "فصل" : "اختبار"}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <Badge variant={item.id === "new-quiz" ? "outline" : (item.isPublished ? "default" : "secondary")} className={item.id === "new-quiz" ? "border-blue-300 text-blue-700" : ""}>
-                                                                    {item.id === "new-quiz" ? "جديد" : (item.isPublished ? "منشور" : "مسودة")}
-                                                                </Badge>
-                                                            </div>
-                                                        )}
-                                                    </Draggable>
-                                                ))}
-                                                
-                                                {provided.placeholder}
-                                            </div>
-                                        )}
-                                    </Droppable>
-                                </DragDropContext>
-                            ) : (
-                                <div className="text-center py-8">
-                                    <p className="text-muted-foreground mb-4">
-                                        لا توجد فصول أو اختبارات في هذه الكورس. سيتم إضافة الاختبار في الموقع الأول.
-                                    </p>
-                                    <div className="p-3 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50">
-                                        <div className="flex items-center justify-center space-x-3">
-                                            <div>
-                                                <div className="font-medium text-blue-800">
-                                                    {quizTitle || "اختبار جديد"}
-                                                </div>
-                                                <div className="text-sm text-blue-600">اختبار</div>
-                                            </div>
-                                            <Badge variant="outline" className="border-blue-300 text-blue-700">
-                                                جديد
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                )}
 
                 <div className="space-y-2">
                     <Label>وصف الاختبار</Label>
@@ -509,7 +225,7 @@ const CreateQuizPage = () => {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <CardTitle className="text-lg">السؤال {index + 1}</CardTitle>
-                                        {(!question.text.trim() || !question.correctAnswer.toString().trim() || 
+                                        {(!question.text.trim() || 
                                           (question.type === "MULTIPLE_CHOICE" && 
                                            (!question.options || question.options.filter(opt => opt.trim() !== "").length < 2))) && (
                                             <Badge variant="destructive" className="text-xs">
@@ -638,7 +354,7 @@ const CreateQuizPage = () => {
 
                                 {question.type === "TRUE_FALSE" && (
                                     <div className="space-y-2">
-                                        <Label>الإجابة الصحيحة</Label>
+                                        <Label>الإجابة الصحيحة (اختياري)</Label>
                                         <Select
                                             value={typeof question.correctAnswer === 'string' ? question.correctAnswer : ''}
                                             onValueChange={(value) => updateQuestion(index, "correctAnswer", value)}
@@ -656,7 +372,7 @@ const CreateQuizPage = () => {
 
                                 {question.type === "SHORT_ANSWER" && (
                                     <div className="space-y-2">
-                                        <Label>الإجابة الصحيحة</Label>
+                                        <Label>الإجابة الصحيحة (اختياري)</Label>
                                         <Input
                                             value={typeof question.correctAnswer === 'string' ? question.correctAnswer : ''}
                                             onChange={(e) => updateQuestion(index, "correctAnswer", e.target.value)}

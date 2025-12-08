@@ -139,19 +139,7 @@ export async function PATCH(
                 if (validOptions.length < 2) {
                     return NextResponse.json({ error: `Question ${i + 1}: At least 2 valid options are required` }, { status: 400 });
                 }
-
-                // For multiple choice, correctAnswer should be an index
-                if (typeof question.correctAnswer !== 'number' || question.correctAnswer < 0 || question.correctAnswer >= validOptions.length) {
-                    return NextResponse.json({ error: `Question ${i + 1}: Valid correct answer index is required` }, { status: 400 });
-                }
-            } else if (question.type === "TRUE_FALSE") {
-                if (!question.correctAnswer || (question.correctAnswer !== "true" && question.correctAnswer !== "false")) {
-                    return NextResponse.json({ error: `Question ${i + 1}: Correct answer must be "true" or "false"` }, { status: 400 });
-                }
-            } else if (question.type === "SHORT_ANSWER") {
-                if (!question.correctAnswer || !question.correctAnswer.toString().trim()) {
-                    return NextResponse.json({ error: `Question ${i + 1}: Correct answer is required` }, { status: 400 });
-                }
+                // correctAnswer is optional - no validation needed
             }
 
             if (!question.points || question.points <= 0) {
@@ -191,23 +179,25 @@ export async function PATCH(
             }
         });
 
-        // Add questions separately
+        // Add questions separately (correctAnswer is optional)
         if (questions.length > 0) {
             await db.question.createMany({
                 data: questions.map((question: any, index: number) => {
-                    let correctAnswerValue = question.correctAnswer;
+                    let correctAnswerValue = question.correctAnswer || null;
                     
-                    // For multiple choice questions, convert index to actual option value
-                    if (question.type === "MULTIPLE_CHOICE") {
+                    // For multiple choice questions, convert index to actual option value if correctAnswer is provided
+                    if (question.type === "MULTIPLE_CHOICE" && typeof question.correctAnswer === 'number') {
                         const validOptions = question.options.filter((option: string) => option && option.trim() !== "");
-                        correctAnswerValue = validOptions[question.correctAnswer];
+                        if (question.correctAnswer >= 0 && question.correctAnswer < validOptions.length) {
+                            correctAnswerValue = validOptions[question.correctAnswer];
+                        }
                     }
                     
                     return {
                         text: question.text,
                         type: question.type,
                         options: question.type === "MULTIPLE_CHOICE" ? stringifyQuizOptions(question.options) : null,
-                        correctAnswer: correctAnswerValue,
+                        correctAnswer: correctAnswerValue, // Optional - no automatic grading
                         points: question.points,
                         imageUrl: question.imageUrl || null,
                         quizId: resolvedParams.quizId,
@@ -250,6 +240,46 @@ export async function PATCH(
         return NextResponse.json(quizWithParsedOptions);
     } catch (error) {
         console.log("[QUIZ_PATCH]", error);
+        return NextResponse.json({ error: "Internal Error" }, { status: 500 });
+    }
+}
+
+export async function DELETE(
+    req: Request,
+    { params }: { params: Promise<{ quizId: string }> }
+) {
+    try {
+        const { userId } = await auth();
+        const resolvedParams = await params;
+
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        // Check if quiz exists
+        const quiz = await db.quiz.findUnique({
+            where: { id: resolvedParams.quizId },
+            select: { courseId: true }
+        });
+
+        if (!quiz) {
+            return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
+        }
+
+        // Only allow deletion of standalone quizzes (courseId is null)
+        // Course quizzes should be deleted via the course route
+        if (quiz.courseId) {
+            return NextResponse.json({ error: "Cannot delete course quiz from this route" }, { status: 400 });
+        }
+
+        // Delete the quiz (cascade will delete questions and results)
+        await db.quiz.delete({
+            where: { id: resolvedParams.quizId }
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.log("[QUIZ_DELETE]", error);
         return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }
 } 
