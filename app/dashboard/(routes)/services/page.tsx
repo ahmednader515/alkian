@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Briefcase } from "lucide-react";
+import { ArrowRight, Briefcase, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import axios from "axios";
 
@@ -76,6 +76,42 @@ export default function ServicesPage() {
           )}
         </div>
       )}
+
+      {/* WhatsApp Contact Banner */}
+      <div className="mt-12 mb-6">
+        <a
+          href="https://wa.me/201146450551"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block"
+        >
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-green-500 via-green-600 to-green-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-400/20 to-transparent"></div>
+            <div className="relative px-6 py-8 md:px-10 md:py-10 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4 flex-1">
+                <div className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <MessageCircle className="h-8 w-8 md:h-10 md:w-10 text-white" />
+                </div>
+                <div className="text-right">
+                  <h3 className="text-lg md:text-xl font-bold text-white mb-1">
+                    لتفاصيل الكورسات
+                  </h3>
+                  <p className="text-sm md:text-base text-white/90 font-medium">
+                    كلمنا واتس 01146450551
+                  </p>
+                </div>
+              </div>
+              <div className="flex-shrink-0">
+                <div className="px-6 py-3 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
+                  <span className="text-white font-semibold text-sm md:text-base">
+                  تواصل معنا
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
     </div>
   );
 }
