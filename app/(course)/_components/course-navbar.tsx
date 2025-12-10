@@ -1,15 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import { CourseMobileSidebar } from "./course-mobile-sidebar";
 
 export const CourseNavbar = () => {
   const router = useRouter();
+  const { data: session } = useSession();
 
   const handleBackToDashboard = () => {
-    router.push("/dashboard/my-courses");
+    if (session?.user) {
+      router.push("/dashboard/my-courses");
+    } else {
+      router.push("/");
+    }
   };
 
   return (

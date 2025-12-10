@@ -153,6 +153,12 @@ export default function CoursesCarousel({ courses, title }: CoursesCarouselProps
                       عرض الكورس
                     </Link>
                   </Button>
+
+                  {/* WhatsApp Contact Text */}
+                  <div className={`mt-4 text-center text-sm ${index % 3 === 1 ? 'text-white/90' : 'text-muted-foreground'}`}>
+                    <p>لتفاصيل الكورس</p>
+                    <p>كلمنا واتس 01146450551</p>
+                  </div>
                 </div>
               </SwiperSlide>
             ))}

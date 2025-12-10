@@ -50,7 +50,7 @@ interface Question {
     imageUrl?: string;
     type: "MULTIPLE_CHOICE" | "TRUE_FALSE" | "SHORT_ANSWER";
     options?: string[];
-    correctAnswer: string | number; // Can be string for TRUE_FALSE/SHORT_ANSWER or number for MULTIPLE_CHOICE
+    correctAnswer?: string | number; // Optional - no automatic grading
     points: number;
 }
 
@@ -111,17 +111,12 @@ const EditQuizPage = () => {
                 setQuizMaxAttempts(quiz.maxAttempts || 1);
                 setSelectedCourse(quiz.courseId);
                 
-                // Convert stored string correctAnswer values back to indices for multiple choice questions
+                // Process questions (correctAnswer is optional - no automatic grading)
                 const processedQuestions = quiz.questions.map(question => {
-                    if (question.type === "MULTIPLE_CHOICE" && question.options) {
-                        const validOptions = question.options.filter(option => option.trim() !== "");
-                        const correctAnswerIndex = validOptions.findIndex(option => option === question.correctAnswer);
-                        return {
-                            ...question,
-                            correctAnswer: correctAnswerIndex >= 0 ? correctAnswerIndex : 0
-                        };
-                    }
-                    return question;
+                    return {
+                        ...question,
+                        correctAnswer: question.correctAnswer || undefined
+                    };
                 });
                 
                 setQuestions(processedQuestions);
@@ -210,27 +205,11 @@ const EditQuizPage = () => {
                 continue;
             }
 
-            // Validate correct answer
+            // Validate question options
             if (question.type === "MULTIPLE_CHOICE") {
                 const validOptions = question.options?.filter(option => option.trim() !== "") || [];
                 if (validOptions.length === 0) {
                     validationErrors.push(`السؤال ${i + 1}: يجب إضافة خيار واحد على الأقل`);
-                    continue;
-                }
-                
-                // Check if correct answer index is valid
-                if (typeof question.correctAnswer !== 'number' || question.correctAnswer < 0 || question.correctAnswer >= validOptions.length) {
-                    validationErrors.push(`السؤال ${i + 1}: يجب اختيار إجابة صحيحة`);
-                    continue;
-                }
-            } else if (question.type === "TRUE_FALSE") {
-                if (!question.correctAnswer || (question.correctAnswer !== "true" && question.correctAnswer !== "false")) {
-                    validationErrors.push(`السؤال ${i + 1}: يجب اختيار إجابة صحيحة`);
-                    continue;
-                }
-            } else if (question.type === "SHORT_ANSWER") {
-                if (!question.correctAnswer || question.correctAnswer.toString().trim() === "") {
-                    validationErrors.push(`السؤال ${i + 1}: الإجابة الصحيحة مطلوبة`);
                     continue;
                 }
             }
@@ -305,7 +284,7 @@ const EditQuizPage = () => {
             text: "",
             type: "MULTIPLE_CHOICE",
             options: ["", "", "", ""],
-            correctAnswer: 0, // Default to index 0 for MULTIPLE_CHOICE
+            correctAnswer: undefined, // Optional - no automatic grading
             points: 1,
         };
         setQuestions([...questions, newQuestion]);
@@ -566,11 +545,7 @@ const EditQuizPage = () => {
                                         <CardTitle className="text-lg">السؤال {index + 1}</CardTitle>
                                         {(!question.text.trim() || 
                                             (question.type === "MULTIPLE_CHOICE" && 
-                                             (!question.options || question.options.filter(opt => opt.trim() !== "").length === 0)) ||
-                                            (question.type === "TRUE_FALSE" && 
-                                             (typeof question.correctAnswer !== 'string' || (question.correctAnswer !== "true" && question.correctAnswer !== "false"))) ||
-                                            (question.type === "SHORT_ANSWER" && 
-                                             (typeof question.correctAnswer !== 'string' || question.correctAnswer.trim() === ""))) && (
+                                             (!question.options || question.options.filter(opt => opt.trim() !== "").length === 0))) && (
                                             <Badge variant="destructive" className="text-xs">
                                                 غير مكتمل
                                             </Badge>
@@ -679,54 +654,13 @@ const EditQuizPage = () => {
                                                     value={option}
                                                     onChange={(e) => {
                                                         const newOptions = [...(question.options || ["", "", "", ""])];
-                                                        const oldOptionValue = newOptions[optionIndex];
                                                         newOptions[optionIndex] = e.target.value;
                                                         updateQuestion(index, "options", newOptions);
-                                                        
-                                                        // If this option was the correct answer, update the correct answer to the new value
-                                                        if (question.correctAnswer === oldOptionValue) {
-                                                            updateQuestion(index, "correctAnswer", optionIndex);
-                                                        }
                                                     }}
                                                     placeholder={`الخيار ${optionIndex + 1}`}
                                                 />
-                                                <input
-                                                    type="radio"
-                                                    name={`correct-${index}`}
-                                                    checked={question.correctAnswer === optionIndex}
-                                                    onChange={() => updateQuestion(index, "correctAnswer", optionIndex)}
-                                                />
                                             </div>
                                         ))}
-                                    </div>
-                                )}
-
-                                {question.type === "TRUE_FALSE" && (
-                                    <div className="space-y-2">
-                                        <Label>الإجابة الصحيحة</Label>
-                                        <Select
-                                            value={typeof question.correctAnswer === 'string' ? question.correctAnswer : ''}
-                                            onValueChange={(value) => updateQuestion(index, "correctAnswer", value)}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="اختر الإجابة الصحيحة" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="true">صح</SelectItem>
-                                                <SelectItem value="false">خطأ</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                )}
-
-                                {question.type === "SHORT_ANSWER" && (
-                                    <div className="space-y-2">
-                                        <Label>الإجابة الصحيحة</Label>
-                                        <Input
-                                            value={typeof question.correctAnswer === 'string' ? question.correctAnswer : ''}
-                                            onChange={(e) => updateQuestion(index, "correctAnswer", e.target.value)}
-                                            placeholder="أدخل الإجابة الصحيحة"
-                                        />
                                     </div>
                                 )}
                             </CardContent>

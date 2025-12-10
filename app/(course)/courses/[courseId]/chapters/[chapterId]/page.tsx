@@ -4,10 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, CheckCircle2, Circle, Lock, FileText, Download } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronLeft, ChevronRight, CheckCircle2, Circle, Lock, FileText, Download, BookOpen } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { PlyrVideoPlayer } from "@/components/plyr-video-player";
+import Image from "next/image";
+import { useSession } from "next-auth/react";
 
 interface Chapter {
   id: string;
@@ -34,6 +37,262 @@ interface Chapter {
     isCompleted: boolean;
   }[];
 }
+
+interface CourseContent {
+  id: string;
+  title: string;
+  description: string | null;
+  position: number;
+  type: 'chapter' | 'quiz';
+  isFree?: boolean;
+}
+
+interface Course {
+  id: string;
+  title: string;
+  description: string | null;
+  imageUrl: string | null;
+  price: number;
+  chapters: {
+    id: string;
+    title: string;
+    description: string | null;
+    isFree: boolean;
+    position: number;
+  }[];
+  quizzes: {
+    id: string;
+    title: string;
+    description: string | null;
+    position: number;
+  }[];
+  user: {
+    id: string;
+    fullName: string;
+    image: string;
+  };
+}
+
+const LockedChapterView = ({ courseId, chapter }: { courseId: string; chapter: Chapter }) => {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCourse();
+  }, [courseId]);
+
+  const fetchCourse = async () => {
+    try {
+      const response = await axios.get(`/api/courses/${courseId}`);
+      if (response.data) {
+        setCourse(response.data);
+      } else {
+        toast.error("الكورس غير موجود");
+      }
+    } catch (error: any) {
+      console.error("Error fetching course:", error);
+      if (error.response?.status === 404) {
+        toast.error("الكورس غير موجود");
+      } else {
+        toast.error("حدث خطأ أثناء تحميل الكورس");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePurchase = () => {
+    if (!session?.user) {
+      router.push("/sign-in");
+      return;
+    }
+    router.push(`/courses/${courseId}/purchase`);
+  };
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center min-h-[calc(100vh-80px)]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#052c4b]"></div>
+      </div>
+    );
+  }
+
+  if (!course) {
+    return (
+      <div className="h-full flex items-center justify-center min-h-[calc(100vh-80px)]">
+        <div className="text-center space-y-4 w-full max-w-md px-4">
+          <Lock className="h-8 w-8 mx-auto text-muted-foreground" />
+          <h2 className="text-2xl font-semibold">هذا الفصل مغلق</h2>
+          <p className="text-muted-foreground">شراء الكورس للوصول إلى جميع الفصول</p>
+          <Button onClick={handlePurchase} className="w-full">
+            شراء الكورس
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Combine chapters and quizzes, sort by position
+  const allContent = [
+    ...course.chapters.map(ch => ({ ...ch, type: 'chapter' as const })),
+    ...course.quizzes.map(q => ({ ...q, type: 'quiz' as const }))
+  ].sort((a, b) => a.position - b.position);
+
+  return (
+    <div className="h-full min-h-[calc(100vh-80px)]">
+      <div className="max-w-5xl mx-auto p-6">
+        <div className="space-y-6">
+          {/* Locked Message */}
+          <Card className="border-amber-200 bg-amber-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Lock className="h-6 w-6 text-amber-600" />
+                <h2 className="text-2xl font-semibold text-amber-900">هذا الفصل مغلق</h2>
+              </div>
+              <p className="text-amber-700 mb-4">شراء الكورس للوصول إلى جميع الفصول والمحتوى</p>
+            </CardContent>
+          </Card>
+
+          {/* Course Header */}
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col md:flex-row gap-6">
+                {course.imageUrl && course.imageUrl.trim() !== "" && (
+                  <div className="relative w-full md:w-64 h-48 md:h-64 rounded-lg overflow-hidden flex-shrink-0">
+                    <Image
+                      src={course.imageUrl}
+                      alt={course.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <CardTitle className="text-3xl mb-4">{course.title}</CardTitle>
+                  {course.description ? (
+                    <div 
+                      className="text-base text-muted-foreground mb-4 prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: course.description }}
+                    />
+                  ) : (
+                    <CardDescription className="text-base mb-4">
+                      لا يوجد وصف للكورس
+                    </CardDescription>
+                  )}
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="flex items-center gap-2">
+                      {course.user.image && course.user.image.trim() !== "" && (
+                        <Image
+                          src={course.user.image}
+                          alt={course.user.fullName}
+                          width={32}
+                          height={32}
+                          className="rounded-full"
+                        />
+                      )}
+                      <span className="text-sm text-muted-foreground">{course.user.fullName}</span>
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-[#052c4b]">
+                    {course.price === 0 ? "مجاني" : `${course.price.toFixed(2)} جنيه`}
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+
+          {/* Course Content */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5" />
+                محتوى الكورس
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {allContent.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">
+                  لا يوجد محتوى متاح حالياً
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {allContent.map((content) => {
+                    const isChapter = content.type === 'chapter';
+                    const isCurrentChapter = isChapter && content.id === chapter.id;
+                    const isLocked = isChapter && !content.isFree;
+
+                    return (
+                      <div
+                        key={content.id}
+                        className={`flex items-center gap-4 p-4 rounded-lg border transition-all ${
+                          isCurrentChapter
+                            ? 'bg-amber-50 border-amber-200'
+                            : isLocked
+                            ? 'bg-muted opacity-60'
+                            : 'bg-card hover:bg-accent'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          {isLocked ? (
+                            <Lock className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                          ) : (
+                            <Circle className="h-5 w-5 text-primary flex-shrink-0" />
+                          )}
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className={`font-medium ${isCurrentChapter ? 'text-amber-900' : ''}`}>
+                                {content.title}
+                                {isCurrentChapter && ' (الفصل الحالي)'}
+                              </span>
+                              {isChapter && (content as any).isFree && (
+                                <span className="px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-800 rounded-full">
+                                  مجاني
+                                </span>
+                              )}
+                              {!isChapter && (
+                                <span className="px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">
+                                  اختبار
+                                </span>
+                              )}
+                            </div>
+                            {content.description && (
+                              <div 
+                                className="text-sm text-muted-foreground mt-1 line-clamp-2 prose prose-sm max-w-none"
+                                dangerouslySetInnerHTML={{ __html: content.description }}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Purchase Button */}
+          <Card className="border-[#052c4b]">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <h3 className="text-xl font-semibold">شراء الكورس للوصول إلى جميع المحتويات</h3>
+                <Button
+                  onClick={handlePurchase}
+                  className="w-full md:w-auto bg-[#052c4b] hover:bg-[#052c4b]/90 text-white"
+                  size="lg"
+                >
+                  {session?.user ? "شراء الكورس" : "تسجيل الدخول للشراء"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ChapterPage = () => {
   const router = useRouter();
@@ -244,18 +503,7 @@ const ChapterPage = () => {
   }
 
   if (!hasAccess && !chapter.isFree) {
-    return (
-      <div className="h-full flex items-center justify-center min-h-[calc(100vh-80px)]">
-        <div className="text-center space-y-4 w-full max-w-md px-4">
-          <Lock className="h-8 w-8 mx-auto text-muted-foreground" />
-          <h2 className="text-2xl font-semibold">هذا الفصل مغلق</h2>
-          <p className="text-muted-foreground">شراء الكورس للوصول إلى جميع الفصول</p>
-          <Button onClick={() => router.push(`/courses/${routeParams.courseId}/purchase`)} className="w-full">
-            شراء الكورس
-          </Button>
-        </div>
-      </div>
-    );
+    return <LockedChapterView courseId={routeParams.courseId} chapter={chapter} />;
   }
 
   return (

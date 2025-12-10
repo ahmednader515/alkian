@@ -341,43 +341,8 @@ const CreateQuizPage = () => {
                                                     }}
                                                     placeholder={`الخيار ${optionIndex + 1}`}
                                                 />
-                                                <input
-                                                    type="radio"
-                                                    name={`correct-${index}`}
-                                                    checked={typeof question.correctAnswer === 'number' && question.correctAnswer === optionIndex}
-                                                    onChange={() => updateQuestion(index, "correctAnswer", optionIndex)}
-                                                />
                                             </div>
                                         ))}
-                                    </div>
-                                )}
-
-                                {question.type === "TRUE_FALSE" && (
-                                    <div className="space-y-2">
-                                        <Label>الإجابة الصحيحة (اختياري)</Label>
-                                        <Select
-                                            value={typeof question.correctAnswer === 'string' ? question.correctAnswer : ''}
-                                            onValueChange={(value) => updateQuestion(index, "correctAnswer", value)}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="اختر الإجابة الصحيحة" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="true">صح</SelectItem>
-                                                <SelectItem value="false">خطأ</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                )}
-
-                                {question.type === "SHORT_ANSWER" && (
-                                    <div className="space-y-2">
-                                        <Label>الإجابة الصحيحة (اختياري)</Label>
-                                        <Input
-                                            value={typeof question.correctAnswer === 'string' ? question.correctAnswer : ''}
-                                            onChange={(e) => updateQuestion(index, "correctAnswer", e.target.value)}
-                                            placeholder="أدخل الإجابة الصحيحة"
-                                        />
                                     </div>
                                 )}
                             </CardContent>

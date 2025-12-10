@@ -28,6 +28,9 @@ export default withAuth(
     
     // Add check for payment status page
     const isPaymentStatusPage = req.nextUrl.pathname.includes("/payment-status");
+    
+    // Allow course pages to be accessed without authentication
+    const isCoursePage = req.nextUrl.pathname.startsWith("/courses/");
 
     // If user is on auth page and is authenticated, redirect to appropriate dashboard
     if (isAuthPage && req.nextauth.token) {
@@ -37,8 +40,8 @@ export default withAuth(
     }
 
     // If user is not authenticated and trying to access protected routes
-    // But exclude payment status page from this check
-    if (!req.nextauth.token && !isAuthPage && !isPaymentStatusPage) {
+    // But exclude payment status page and course pages from this check
+    if (!req.nextauth.token && !isAuthPage && !isPaymentStatusPage && !isCoursePage) {
       return NextResponse.redirect(new URL("/sign-in", req.url), { status: 302 });
     }
 

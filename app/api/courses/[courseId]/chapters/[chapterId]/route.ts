@@ -10,16 +10,21 @@ export async function GET(
     const resolvedParams = await params;
     const { courseId, chapterId } = resolvedParams;
     
-    const { userId } = await auth();
-
-    if (!userId) {
-      return new NextResponse("Unauthorized", { status: 401 });
+    // Try to get user, but don't require authentication for public access
+    let userId = null;
+    try {
+      const authResult = await auth();
+      userId = authResult.userId;
+    } catch (error) {
+      // User is not authenticated, which is fine for public chapter viewing
+      console.log("User not authenticated, showing public chapter data");
     }
 
     const chapter = await db.chapter.findUnique({
       where: {
         id: chapterId,
         courseId: courseId,
+        isPublished: true,
       },
       include: {
         course: {
@@ -27,11 +32,11 @@ export async function GET(
             userId: true,
           }
         },
-        userProgress: {
+        userProgress: userId ? {
           where: {
             userId,
           }
-        },
+        } : false,
         attachments: {
           orderBy: {
             position: 'asc',

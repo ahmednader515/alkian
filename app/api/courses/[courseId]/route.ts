@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -8,12 +9,17 @@ export async function GET(
 ) {
     try {
         const resolvedParams = await params;
-        const { userId } = await auth();
-        const { courseId } = resolvedParams;
-
-        if (!userId) {
-            return new NextResponse("Unauthorized", { status: 401 });
+        // Try to get user, but don't require authentication for public access
+        let userId = null;
+        try {
+            const session = await getServerSession(authOptions);
+            userId = session?.user?.id || null;
+        } catch (error) {
+            // User is not authenticated, which is fine for public course viewing
+            console.log("User not authenticated, showing public course data:", error);
         }
+        
+        const { courseId } = resolvedParams;
 
         const course = await db.course.findUnique({
             where: {
@@ -28,17 +34,50 @@ export async function GET(
                     orderBy: {
                         position: "asc",
                     },
+                    select: {
+                        id: true,
+                        title: true,
+                        description: true,
+                        isFree: true,
+                        position: true,
+                        videoUrl: true,
+                        videoType: true,
+                        youtubeVideoId: true,
+                    },
+                },
+                quizzes: {
+                    where: {
+                        isPublished: true,
+                    },
+                    orderBy: {
+                        position: "asc",
+                    },
+                    select: {
+                        id: true,
+                        title: true,
+                        description: true,
+                        position: true,
+                    },
                 },
                 attachments: {
                     orderBy: {
                         createdAt: "desc",
                     },
                 },
-                purchases: {
-                    where: {
-                        userId,
+                user: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                        image: true,
                     },
                 },
+                ...(userId ? {
+                    purchases: {
+                        where: {
+                            userId,
+                        },
+                    },
+                } : {}),
             },
         });
 
@@ -48,11 +87,18 @@ export async function GET(
 
         return NextResponse.json(course);
     } catch (error) {
-        console.error("[COURSE_ID]", error);
+        console.error("[COURSE_ID] Error details:", error);
         if (error instanceof Error) {
-            return new NextResponse(`Internal Error: ${error.message}`, { status: 500 });
+            console.error("[COURSE_ID] Error stack:", error.stack);
+            return NextResponse.json(
+                { error: `Internal Error: ${error.message}` },
+                { status: 500 }
+            );
         }
-        return new NextResponse("Internal Error", { status: 500 });
+        return NextResponse.json(
+            { error: "Internal Error" },
+            { status: 500 }
+        );
     }
 }
 
