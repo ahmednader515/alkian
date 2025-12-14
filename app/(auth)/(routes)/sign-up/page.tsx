@@ -11,6 +11,7 @@ import axios, { AxiosError } from "axios";
 import { Check, X, Eye, EyeOff, ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import ReCAPTCHA from "react-google-recaptcha";
+import { RecaptchaGate } from "@/components/recaptcha-gate";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -102,7 +103,8 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background overflow-y-auto overflow-x-hidden">
+    <RecaptchaGate storageKey="signup_recaptcha_verified">
+      <div className="flex min-h-screen bg-background overflow-y-auto overflow-x-hidden">
       <div className="absolute top-4 left-4 z-10">
         <Button variant="ghost" size="lg" asChild>
           <Link href="/">
@@ -292,6 +294,7 @@ export default function SignUpPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </RecaptchaGate>
   );
 } 
