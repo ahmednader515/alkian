@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth, authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 export async function GET(

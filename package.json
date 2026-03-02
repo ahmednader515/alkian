@@ -12,6 +12,7 @@
     "fix:quiz-options": "node scripts/fix-quiz-options.js",
     "test:quiz-options": "node scripts/test-quiz-options.js",
     "migrate-uploadthing": "npx tsx ./scripts/migrate-uploadthing-files.ts",
+    "download-uploadthing": "npx tsx ./scripts/download-uploadthing-files.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

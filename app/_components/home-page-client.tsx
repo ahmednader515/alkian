@@ -32,8 +32,6 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { RecaptchaGate } from "@/components/recaptcha-gate";
-
 interface Course {
   id: string;
   title: string;
@@ -269,8 +267,7 @@ export function HomePageClient({
   };
 
   return (
-    <RecaptchaGate storageKey="homepage_recaptcha_verified">
-      <div className="h-full w-full bg-background">
+    <div className="h-full w-full bg-background">
         <Navbar />
       
       {/* Hero Section */}
@@ -1390,8 +1387,7 @@ export function HomePageClient({
           </div>
         </DialogContent>
       </Dialog>
-      </div>
-    </RecaptchaGate>
+    </div>
   );
 }
 
