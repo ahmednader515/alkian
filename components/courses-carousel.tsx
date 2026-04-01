@@ -40,7 +40,7 @@ export default function CoursesCarousel({ courses, title }: CoursesCarouselProps
   if (courses.length === 0) {
     return (
       <div className="w-full py-10">
-        <h2 className="text-2xl font-bold text-center mb-6 text-[#052c4b]">{title}</h2>
+        <h2 className="text-2xl font-bold text-center mb-6 text-[color:var(--home-primary)]">{title}</h2>
         <div className="text-center py-16">
           <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">لا توجد كورسات متاحة حالياً</p>
@@ -51,7 +51,7 @@ export default function CoursesCarousel({ courses, title }: CoursesCarouselProps
 
   return (
     <div className="w-full py-10">
-      <h2 className="text-2xl font-bold text-center mb-6 text-[#052c4b]">{title}</h2>
+      <h2 className="text-2xl font-bold text-center mb-6 text-[color:var(--home-primary)]">{title}</h2>
       
       {/* Mobile Swipe Indicator */}
       <div className="md:hidden flex justify-center mb-4">
@@ -71,14 +71,14 @@ export default function CoursesCarousel({ courses, title }: CoursesCarouselProps
               className="swiper-button-prev absolute left-0 top-1/2 -translate-y-1/2 pointer-events-auto w-12 h-12 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
               aria-label="Previous slide"
             >
-              <ChevronLeft className="h-6 w-6 text-[#052c4b]" />
+              <ChevronLeft className="h-6 w-6 text-[color:var(--home-primary)]" />
             </button>
             <button 
               onClick={goToPrev}
               className="swiper-button-next absolute right-0 top-1/2 -translate-y-1/2 pointer-events-auto w-12 h-12 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
               aria-label="Next slide"
             >
-              <ChevronRight className="h-6 w-6 text-[#052c4b]" />
+              <ChevronRight className="h-6 w-6 text-[color:var(--home-primary)]" />
             </button>
           </div>
           <Swiper
@@ -116,26 +116,26 @@ export default function CoursesCarousel({ courses, title }: CoursesCarouselProps
             }}
             className="courses-swiper"
             style={{
-              '--swiper-navigation-color': '#052c4b',
-              '--swiper-pagination-color': '#052c4b',
+              '--swiper-navigation-color': 'var(--home-primary)',
+              '--swiper-pagination-color': 'var(--home-primary)',
             } as React.CSSProperties}
           >
             {courses.map((course, index) => (
               <SwiperSlide key={course.id}>
                 <div
                   className={`rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 ${
-                    index % 3 === 1 ? 'bg-[#052c4b] text-white transform scale-105' : 'bg-white text-[#052c4b]'
+                    index % 3 === 1 ? 'bg-[var(--home-primary)] text-white transform scale-105' : 'bg-white text-[color:var(--home-primary)]'
                   }`}
                 >
                   {/* Course Icon and Title */}
                   <div className="text-center mb-6">
                     <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
-                      index % 3 === 1 ? 'bg-white/20' : 'bg-[#052c4b]/10'
+                      index % 3 === 1 ? 'bg-white/20' : 'bg-[color-mix(in_srgb,var(--home-primary)_12%,transparent)]'
                     }`}>
-                      <BookOpen className={`h-8 w-8 ${index % 3 === 1 ? 'text-white' : 'text-[#052c4b]'}`} />
+                      <BookOpen className={`h-8 w-8 ${index % 3 === 1 ? 'text-white' : 'text-[color:var(--home-primary)]'}`} />
                     </div>
                     <h3 className="text-xl font-bold mb-4 line-clamp-2 min-h-[3rem]">{course.title}</h3>
-                    <div className={`text-2xl font-bold mb-6 ${index % 3 === 1 ? 'text-white' : 'text-[#052c4b]'}`}>
+                    <div className={`text-2xl font-bold mb-6 ${index % 3 === 1 ? 'text-white' : 'text-[color:var(--home-primary)]'}`}>
                       {course.price === 0 ? "مجاني" : `${course.price} جنيه`}
                     </div>
                   </div>
@@ -145,8 +145,8 @@ export default function CoursesCarousel({ courses, title }: CoursesCarouselProps
                     asChild
                     className={`w-full py-3 text-lg font-semibold rounded-xl transition-all duration-300 ${
                       index % 3 === 1 
-                        ? 'bg-white text-[#052c4b] hover:bg-gray-100' 
-                        : 'bg-[#052c4b] text-white hover:bg-[#052c4b]/90'
+                        ? 'bg-white text-[color:var(--home-primary)] hover:bg-gray-100' 
+                        : 'bg-[var(--home-primary)] text-white hover:opacity-90'
                     }`}
                   >
                     <Link href={`/courses/${course.id}`}>

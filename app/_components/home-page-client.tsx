@@ -32,6 +32,19 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
+import type { HomePageContent } from "@/lib/home-page-settings";
+import { homePageCssVars } from "@/lib/home-page-settings";
+import type { LucideIcon } from "lucide-react";
+
+const SESSION_ICONS: Record<string, LucideIcon> = {
+  rehabilitation: GraduationCap,
+  cupping: Heart,
+  massage: Shield,
+  spiritual: Heart,
+  consultation: MessageSquare,
+  personal: User,
+};
+
 interface Course {
   id: string;
   title: string;
@@ -85,6 +98,7 @@ interface Quiz {
 }
 
 interface HomePageClientProps {
+  homeContent: HomePageContent;
   courses: Course[];
   accreditations: Accreditation[];
   certificateDetails: CertificateDetail[];
@@ -98,6 +112,7 @@ interface HomePageClientProps {
 }
 
 export function HomePageClient({ 
+  homeContent: content,
   courses,
   accreditations,
   certificateDetails,
@@ -267,11 +282,17 @@ export function HomePageClient({
   };
 
   return (
-    <div className="h-full w-full bg-background">
-        <Navbar />
+    <div className="h-full w-full bg-background" style={homePageCssVars(content)}>
+        <Navbar logoSrc={content.logoUrl} navPrimary={content.themeNavbar} />
       
       {/* Hero Section */}
-      <section id="hero-section" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 md:pt-0 bg-gradient-to-br from-[#052c4b] via-[#1e3a8a] to-[#3b82f6]">
+      <section
+        id="hero-section"
+        className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 md:pt-0"
+        style={{
+          background: `linear-gradient(to bottom right, ${content.themePrimary}, ${content.themeGradientVia}, ${content.themeGradientTo})`,
+        }}
+      >
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -282,43 +303,44 @@ export function HomePageClient({
             <div className="flex flex-col items-center justify-center mb-8">
               <div 
                 className="relative w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-xl cursor-pointer group"
-                onClick={() => openImageModal("/teacher-image.png")}
-                onTouchStart={(e) => handleImageTouchStart(e, "/teacher-image.png")}
-                onTouchEnd={(e) => handleImageTouchEnd(e, "/teacher-image.png")}
+                onClick={() => openImageModal(content.teacherImageUrl)}
+                onTouchStart={(e) => handleImageTouchStart(e, content.teacherImageUrl)}
+                onTouchEnd={(e) => handleImageTouchEnd(e, content.teacherImageUrl)}
                 style={{ touchAction: 'manipulation' }}
               >
                 <Image
-                  src="/teacher-image.png"
-                  alt="Mr/ Mohamed khaled hassan"
+                  src={content.teacherImageUrl}
+                  alt={content.teacherImageAlt}
                   fill
                   className="object-cover transition-transform group-hover:scale-105 pointer-events-none"
                   priority
+                  unoptimized={content.teacherImageUrl.startsWith("http")}
                 />
               </div>
               <div className="mt-4 text-center">
                 <div className="text-white text-xl md:text-2xl font-semibold">
-                  Mr/ Mohamed khaled hassan
+                  {content.teacherName}
                 </div>
                 <div className="text-blue-100 text-sm md:text-base mt-1">
-                  عميد الكيآن اكاديمي للتأهيل والتدريب
+                  {content.teacherTitle}
                 </div>
               </div>
             </div>
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 text-white">
-              مركز الكيان للتأهيل والتدريب
+              {content.heroTitle}
             </h1>
             <p className="text-xl md:text-2xl lg:text-3xl text-blue-100 mb-8">
-              جميع مجالات الطب التكميلي والتأهيل الرياضي والتمنية البشرية والعناية بالبشرة والشعر والاستشارات
+              {content.heroSubtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" asChild className="bg-white text-[#052c4b] hover:bg-gray-100 text-lg px-8 py-4">
+              <Button size="lg" asChild className="bg-white text-[color:var(--home-primary)] hover:bg-gray-100 text-lg px-8 py-4">
                 <Link href="/sign-up">
-                  ابدأ رحلتك معنا <ArrowRight className="mr-2 h-5 w-5" />
+                  {content.heroCtaPrimary} <ArrowRight className="mr-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" onClick={scrollToServices} className="border-white text-[#052c4b] bg-white hover:bg-[#052c4b] hover:text-white text-lg px-8 py-4">
-                اكتشف خدماتنا
+              <Button size="lg" variant="outline" onClick={scrollToServices} className="border-white text-[color:var(--home-primary)] bg-white hover:bg-[var(--home-primary)] hover:text-white text-lg px-8 py-4">
+                {content.heroCtaSecondary}
               </Button>
             </div>
           </motion.div>
@@ -367,8 +389,8 @@ export function HomePageClient({
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">خدماتنا</h2>
-            <p className="text-muted-foreground text-lg">اكتشف مجموعة متنوعة من الكورسات التعليمية المميزة</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{content.servicesTitle}</h2>
+            <p className="text-muted-foreground text-lg">{content.servicesSubtitle}</p>
           </motion.div>
 
           <motion.div
@@ -379,7 +401,7 @@ export function HomePageClient({
           >
             <CoursesCarousel 
               courses={courses} 
-              title="الكورسات المتاحة" 
+              title={content.coursesCarouselTitle} 
             />
           </motion.div>
         </div>
@@ -395,8 +417,8 @@ export function HomePageClient({
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">الاعتمادات</h2>
-            <p className="text-muted-foreground text-lg">نفتخر بحصولنا على اعتمادات من أرقى المؤسسات المحلية والدولية</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{content.accreditationsTitle}</h2>
+            <p className="text-muted-foreground text-lg">{content.accreditationsSubtitle}</p>
           </motion.div>
 
           {accreditations.length > 0 ? (
@@ -410,10 +432,10 @@ export function HomePageClient({
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="text-center p-6 rounded-xl bg-card border shadow-sm hover:shadow-md transition-all"
                 >
-                  <div className="w-16 h-16 bg-[#052c4b]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Shield className="h-8 w-8 text-[#052c4b]" />
+                  <div className="w-16 h-16 bg-[color-mix(in_srgb,var(--home-primary)_12%,transparent)] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Shield className="h-8 w-8 text-[color:var(--home-primary)]" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-[#052c4b]">{accreditation.title}</h3>
+                  <h3 className="text-lg font-semibold mb-2 text-[color:var(--home-primary)]">{accreditation.title}</h3>
                 </motion.div>
               ))}
             </div>
@@ -428,20 +450,21 @@ export function HomePageClient({
               >
                 <div 
                   className="w-20 h-20 mx-auto mb-4 relative cursor-pointer group"
-                  onClick={() => openImageModal("/ITC.png")}
-                  onTouchStart={(e) => handleImageTouchStart(e, "/ITC.png")}
-                  onTouchEnd={(e) => handleImageTouchEnd(e, "/ITC.png")}
+                  onClick={() => openImageModal(content.itcImageUrl)}
+                  onTouchStart={(e) => handleImageTouchStart(e, content.itcImageUrl)}
+                  onTouchEnd={(e) => handleImageTouchEnd(e, content.itcImageUrl)}
                   style={{ touchAction: 'manipulation' }}
                 >
                   <Image
-                    src="/ITC.png"
-                    alt="ITC UK"
+                    src={content.itcImageUrl}
+                    alt={content.itcImageAlt}
                     fill
                     className="object-contain transition-transform group-hover:scale-105 pointer-events-none"
+                    unoptimized={content.itcImageUrl.startsWith("http")}
                   />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-[#052c4b]">إعتماد كلية التدريب الدولي البريطاني</h3>
-                <p className="text-sm text-muted-foreground">بإنجلترا - شريك معتمد</p>
+                <h3 className="text-lg font-semibold mb-2 text-[color:var(--home-primary)]">{content.itcTitle}</h3>
+                <p className="text-sm text-muted-foreground">{content.itcSubtitle}</p>
               </motion.div>
 
               <motion.div
@@ -451,11 +474,11 @@ export function HomePageClient({
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="text-center p-6 rounded-xl bg-card border shadow-sm hover:shadow-md transition-all"
               >
-                <div className="w-16 h-16 bg-[#052c4b]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Building2 className="h-8 w-8 text-[#052c4b]" />
+                <div className="w-16 h-16 bg-[color-mix(in_srgb,var(--home-primary)_12%,transparent)] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Building2 className="h-8 w-8 text-[color:var(--home-primary)]" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-[#052c4b]">إعتماد اللجنة النقابية للعاملين</h3>
-                <p className="text-sm text-muted-foreground">بالمهن التجميلية</p>
+                <h3 className="text-lg font-semibold mb-2 text-[color:var(--home-primary)]">{content.accreditation2Title}</h3>
+                <p className="text-sm text-muted-foreground">{content.accreditation2Subtitle}</p>
               </motion.div>
 
               <motion.div
@@ -465,11 +488,11 @@ export function HomePageClient({
                 transition={{ duration: 0.5, delay: 0.3 }}
                 className="text-center p-6 rounded-xl bg-card border shadow-sm hover:shadow-md transition-all"
               >
-                <div className="w-16 h-16 bg-[#052c4b]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Shield className="h-8 w-8 text-[#052c4b]" />
+                <div className="w-16 h-16 bg-[color-mix(in_srgb,var(--home-primary)_12%,transparent)] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="h-8 w-8 text-[color:var(--home-primary)]" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-[#052c4b]">إعتماد محلي وترخيص مزاولة التدريب</h3>
-                <p className="text-sm text-muted-foreground">شهادة اعتماد رسمية</p>
+                <h3 className="text-lg font-semibold mb-2 text-[color:var(--home-primary)]">{content.accreditation3Title}</h3>
+                <p className="text-sm text-muted-foreground">{content.accreditation3Subtitle}</p>
               </motion.div>
             </div>
           )}
@@ -486,7 +509,7 @@ export function HomePageClient({
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">الشهادات</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{content.certificatesTitle}</h2>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
@@ -500,7 +523,7 @@ export function HomePageClient({
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                   className="flex items-center gap-3 p-4 bg-card rounded-lg border shadow-sm hover:shadow-md transition-all"
                 >
-                  <Award className="h-5 w-5 text-[#052c4b] flex-shrink-0" />
+                  <Award className="h-5 w-5 text-[color:var(--home-primary)] flex-shrink-0" />
                   <span className="text-sm font-medium">{cert.title}</span>
                 </motion.div>
               ))
@@ -527,7 +550,7 @@ export function HomePageClient({
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                   className="flex items-center gap-3 p-4 bg-card rounded-lg border shadow-sm hover:shadow-md transition-all"
                 >
-                  <Award className="h-5 w-5 text-[#052c4b] flex-shrink-0" />
+                  <Award className="h-5 w-5 text-[color:var(--home-primary)] flex-shrink-0" />
                   <span className="text-sm font-medium">{cert}</span>
                 </motion.div>
               ))
@@ -535,7 +558,7 @@ export function HomePageClient({
           </div>
 
           <div className="text-center mt-8">
-            <p className="text-muted-foreground mb-4">لتفاصيل أكثر</p>
+            <p className="text-muted-foreground mb-4">{content.certificatesMoreLabel}</p>
             <a 
               href="https://wa.me/201146450551" 
               target="_blank" 
@@ -543,7 +566,7 @@ export function HomePageClient({
               className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 font-semibold"
             >
               <Phone className="h-5 w-5" />
-              كلمنا واتس: 01146450551
+              {content.certificatesWhatsappLabel}
             </a>
           </div>
         </div>
@@ -559,21 +582,16 @@ export function HomePageClient({
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">الجلسات</h2>
-            <p className="text-muted-foreground text-lg">احجز جلسة مناسبة لك</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{content.sessionsTitle}</h2>
+            <p className="text-muted-foreground text-lg">{content.sessionsSubtitle}</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {[
-              { name: "حجز جلسة تأهيل", icon: GraduationCap, id: "rehabilitation" },
-              { name: "حجز جلسة حجامة", icon: Heart, id: "cupping" },
-              { name: "حجز جلسة تدليك", icon: Shield, id: "massage" },
-              { name: "حجز جلسة روحانية", icon: Heart, id: "spiritual" },
-              { name: "حجز استشارة", icon: MessageSquare, id: "consultation" },
-              { name: "حجز مقابلة شخصية", icon: User, id: "personal" },
-            ].map((session, index) => (
+            {content.sessionCards.map((session, index) => {
+              const SessionIcon = SESSION_ICONS[session.id] ?? GraduationCap;
+              return (
               <motion.div
-                key={index}
+                key={session.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -581,18 +599,19 @@ export function HomePageClient({
                 className="bg-card rounded-xl p-6 border shadow-lg hover:shadow-xl transition-all"
               >
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-[#052c4b]/10 rounded-full flex items-center justify-center">
-                    <session.icon className="h-6 w-6 text-[#052c4b]" />
+                  <div className="w-12 h-12 bg-[color-mix(in_srgb,var(--home-primary)_12%,transparent)] rounded-full flex items-center justify-center">
+                    <SessionIcon className="h-6 w-6 text-[color:var(--home-primary)]" />
                   </div>
                   <h3 className="text-lg font-semibold">{session.name}</h3>
                 </div>
-                <Button asChild className="w-full bg-[#052c4b] hover:bg-[#052c4b]/90">
+                <Button asChild className="w-full bg-[var(--home-primary)] hover:opacity-90">
                   <Link href={`/reservation/${session.id}`}>
-                    احجز الآن
+                    {content.sessionBookLabel}
                   </Link>
                 </Button>
               </motion.div>
-            ))}
+            );
+            })}
           </div>
         </div>
       </section>
@@ -607,7 +626,7 @@ export function HomePageClient({
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">الخدمات العامة</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{content.generalServicesTitle}</h2>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
@@ -659,8 +678,8 @@ export function HomePageClient({
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">نموذج للشهادات</h2>
-            <p className="text-muted-foreground text-lg">مساحة لإضافة الشهادات</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{content.certificateTemplatesTitle}</h2>
+            <p className="text-muted-foreground text-lg">{content.certificateTemplatesSubtitle}</p>
           </motion.div>
           {certificateTemplates.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -698,6 +717,7 @@ export function HomePageClient({
                         alt={template.title || "نموذج شهادة"}
                         fill
                         className="object-cover transition-transform group-hover:scale-105 pointer-events-none"
+                        unoptimized={template.imageUrl?.startsWith("http") ?? false}
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none">
                         <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -733,8 +753,8 @@ export function HomePageClient({
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">اعرفنا أكثر</h2>
-            <p className="text-muted-foreground text-lg">مساحة لإضافة المعلومات</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{content.aboutUsTitle}</h2>
+            <p className="text-muted-foreground text-lg">{content.aboutUsSubtitle}</p>
           </motion.div>
           {aboutUsItems.length > 0 ? (
             <div className="max-w-4xl mx-auto space-y-6">
@@ -841,12 +861,12 @@ export function HomePageClient({
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">تسجيل في كورس أون لاين</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{content.onlineCourseTitle}</h2>
           </motion.div>
           <div className="max-w-2xl mx-auto text-center">
-            <Button asChild size="lg" className="bg-[#052c4b] hover:bg-[#052c4b]/90 text-lg px-8 py-4">
+            <Button asChild size="lg" className="bg-[var(--home-primary)] hover:opacity-90 text-lg px-8 py-4">
               <Link href="/reservation/online-course">
-                سجل في كورس الآن
+                {content.onlineCourseButton}
               </Link>
             </Button>
           </div>
@@ -863,12 +883,12 @@ export function HomePageClient({
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">طلب عضوية ووظيفة</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{content.membershipTitle}</h2>
           </motion.div>
           <div className="max-w-2xl mx-auto text-center">
-            <Button asChild size="lg" className="bg-[#052c4b] hover:bg-[#052c4b]/90 text-lg px-8 py-4">
+            <Button asChild size="lg" className="bg-[var(--home-primary)] hover:opacity-90 text-lg px-8 py-4">
               <Link href="/reservation/membership">
-                قدم طلبك الآن
+                {content.membershipButton}
               </Link>
             </Button>
           </div>
@@ -885,8 +905,8 @@ export function HomePageClient({
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">أخبار عامة</h2>
-            <p className="text-muted-foreground text-lg">مساحة لإضافة الأخبار</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{content.newsTitle}</h2>
+            <p className="text-muted-foreground text-lg">{content.newsSubtitle}</p>
           </motion.div>
           {generalNewsItems.length > 0 ? (
             <div className="max-w-4xl mx-auto space-y-6">
@@ -993,8 +1013,8 @@ export function HomePageClient({
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">الاختبارات</h2>
-            <p className="text-muted-foreground text-lg">اكتشف الاختبارات المتاحة</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{content.quizzesTitle}</h2>
+            <p className="text-muted-foreground text-lg">{content.quizzesSubtitle}</p>
           </motion.div>
 
           {quizzes.length > 0 ? (
@@ -1010,7 +1030,7 @@ export function HomePageClient({
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-2 text-[#052c4b]">{quiz.title}</h3>
+                      <h3 className="text-lg font-semibold mb-2 text-[color:var(--home-primary)]">{quiz.title}</h3>
                       {quiz.description && (
                         <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                           {quiz.description}
@@ -1018,24 +1038,24 @@ export function HomePageClient({
                       )}
                       {quiz.course && (
                         <p className="text-xs text-muted-foreground mb-2">
-                          من الكورس: {quiz.course.title}
+                          {content.fromCoursePrefix} {quiz.course.title}
                         </p>
                       )}
                       <p className="text-xs text-muted-foreground">
-                        عدد الأسئلة: {quiz.questions.length}
+                        {content.questionCountPrefix} {quiz.questions.length}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                    <span className="text-sm font-medium text-[#052c4b]">
-                      مجاني
+                    <span className="text-sm font-medium text-[color:var(--home-primary)]">
+                      {content.quizzesFreeLabel}
                     </span>
                     <Button 
                       size="sm" 
-                      className="bg-[#052c4b] hover:bg-[#052c4b]/90"
+                      className="bg-[var(--home-primary)] hover:opacity-90"
                       onClick={(e) => handleQuizClick(e, quiz.id, quiz.courseId)}
                     >
-                      ابدأ الاختبار
+                      {content.quizzesStartButton}
                     </Button>
                   </div>
                 </motion.div>
@@ -1059,8 +1079,8 @@ export function HomePageClient({
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">نبذة عن المحاضرين</h2>
-            <p className="text-muted-foreground text-lg">مساحة لإضافة المحاضرين وصورهم</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{content.lecturersTitle}</h2>
+            <p className="text-muted-foreground text-lg">{content.lecturersSubtitle}</p>
           </motion.div>
           {aboutLecturersItems.length > 0 ? (
             <div className="max-w-4xl mx-auto space-y-6">
@@ -1167,12 +1187,12 @@ export function HomePageClient({
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">طلب تجديد</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{content.renewalTitle}</h2>
           </motion.div>
           <div className="max-w-2xl mx-auto text-center">
-            <Button asChild size="lg" className="bg-[#052c4b] hover:bg-[#052c4b]/90 text-lg px-8 py-4">
+            <Button asChild size="lg" className="bg-[var(--home-primary)] hover:opacity-90 text-lg px-8 py-4">
               <Link href="/reservation/renewal">
-                قدم طلب التجديد
+                {content.renewalButton}
               </Link>
             </Button>
           </div>
@@ -1189,8 +1209,8 @@ export function HomePageClient({
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">هدفنا وإنجازاتنا</h2>
-            <p className="text-muted-foreground text-lg">مساحة لإضافة الأهداف والإنجازات</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{content.goalsTitle}</h2>
+            <p className="text-muted-foreground text-lg">{content.goalsSubtitle}</p>
           </motion.div>
           {goalsAchievementsItems.length > 0 ? (
             <div className="max-w-4xl mx-auto space-y-6">
@@ -1288,7 +1308,12 @@ export function HomePageClient({
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-[#052c4b] to-[#1e3a8a]">
+      <section
+        className="py-20"
+        style={{
+          background: `linear-gradient(to right, ${content.themePrimary}, ${content.themeGradientVia})`,
+        }}
+      >
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1297,18 +1322,18 @@ export function HomePageClient({
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">ابدأ رحلة الشفاء معنا</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">{content.ctaTitle}</h2>
             <p className="text-blue-100 mb-8 text-lg">
-              احجز موعدك اليوم واستمتع بخدماتنا المتخصصة
+              {content.ctaSubtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" asChild className="bg-white text-[#052c4b] hover:bg-gray-100 text-lg px-8 py-4">
+              <Button size="lg" asChild className="bg-white text-[color:var(--home-primary)] hover:bg-gray-100 text-lg px-8 py-4">
                 <Link href="/sign-up">
-                  احجز موعدك الآن <ArrowRight className="mr-2 h-5 w-5" />
+                  {content.ctaPrimary} <ArrowRight className="mr-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-[#052c4b] bg-white hover:bg-[#052c4b] hover:text-white text-lg px-8 py-4">
-                تواصل معنا
+              <Button size="lg" variant="outline" className="border-white text-[color:var(--home-primary)] bg-white hover:bg-[var(--home-primary)] hover:text-white text-lg px-8 py-4">
+                {content.ctaSecondary}
               </Button>
             </div>
           </motion.div>

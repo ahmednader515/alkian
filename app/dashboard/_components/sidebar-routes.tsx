@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart, Compass, Layout, List, Wallet, Shield, Users, Eye, TrendingUp, BookOpen, FileText, Award, PlusSquare, Key, GraduationCap, Calendar, Newspaper, UserCircle, Target, FileCheck } from "lucide-react";
+import { BarChart, Compass, Layout, List, Wallet, Shield, Users, Eye, TrendingUp, BookOpen, FileText, Award, PlusSquare, Key, GraduationCap, Calendar, Newspaper, UserCircle, Target, FileCheck, Home } from "lucide-react";
 import { SidebarItem } from "./sidebar-item";
 import { usePathname } from "next/navigation";
 
@@ -28,6 +28,11 @@ const guestRoutes = [
 ];
 
 const teacherRoutes = [
+    {
+        icon: Home,
+        label: "الصفحة الرئيسية للموقع",
+        href: "/dashboard/teacher/homepage",
+    },
     {
         icon: List,
         label: "الكورسات",

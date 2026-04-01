@@ -7,7 +7,12 @@ import { useSession, signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
 import { getDashboardUrlByRole } from "@/lib/utils";
 
-export const Navbar = () => {
+type NavbarProps = {
+  logoSrc?: string;
+  navPrimary?: string;
+};
+
+export const Navbar = ({ logoSrc = "/logo.png", navPrimary = "#052b4a" }: NavbarProps) => {
   const { data: session } = useSession();
 
   const handleLogout = () => {
@@ -27,12 +32,12 @@ export const Navbar = () => {
               <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-white"></div>
               <div className="bg-white pt-4 px-4 pb-2 rounded-lg shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105 border border-gray-200 flex items-end justify-center">
                 <Image
-                  src="/logo.png"
+                  src={logoSrc}
                   alt="Logo"
                   width={80}
                   height={80}
                   className="mt-2"
-                  unoptimized
+                  unoptimized={logoSrc.startsWith("http")}
                 />
               </div>
             </div>
@@ -42,14 +47,19 @@ export const Navbar = () => {
           <div className="flex items-center gap-4">
             {!session ? (
               <>
-                <Button className="bg-[#052b4a] hover:bg-[#052b4a]/90 text-white" asChild>
+                <Button
+                  className="text-white hover:opacity-90"
+                  style={{ backgroundColor: navPrimary }}
+                  asChild
+                >
                   <Link href="/sign-up">انشاء الحساب</Link>
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
                   asChild
-                  className="border-[#052b4a] text-[#052b4a] hover:bg-[#052b4a]/10"
+                  className="hover:opacity-90"
+                  style={{ borderColor: navPrimary, color: navPrimary }}
                 >
                   <Link href="/sign-in">تسجيل الدخول</Link>
                 </Button>

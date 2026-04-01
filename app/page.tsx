@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getDashboardUrlByRole } from "@/lib/utils";
 import { HomePageClient } from "./_components/home-page-client";
+import { mergeHomePageContent } from "@/lib/home-page-settings";
 
 export default async function HomePage() {
   // Check if user is authenticated
@@ -207,8 +208,19 @@ export default async function HomePage() {
     console.error("Error fetching quizzes:", error);
   }
 
+  let homeContent = mergeHomePageContent(null);
+  try {
+    const homeRow = await db.homePageSettings.findUnique({
+      where: { id: "default" },
+    });
+    homeContent = mergeHomePageContent(homeRow?.data);
+  } catch (error) {
+    console.error("Error fetching homepage settings:", error);
+  }
+
   return (
     <HomePageClient 
+      homeContent={homeContent}
       courses={courses}
       accreditations={accreditations}
       certificateDetails={certificateDetails}

@@ -403,3 +403,10 @@ model GeneralService {
     @@index([teacherId])
     @@index([position])
 }
+
+/// Single-row site-wide homepage copy, images, and theme (edited from teacher dashboard).
+model HomePageSettings {
+    id        String   @id @default("default")
+    data      Json     @default("{}")
+    updatedAt DateTime @updatedAt
+}

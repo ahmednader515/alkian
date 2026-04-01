@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+    Home,
     List,
     FileText,
     Award,
@@ -27,6 +28,11 @@ import {
 import { cn } from "@/lib/utils";
 
 const services = [
+    {
+        icon: Home,
+        label: "الصفحة الرئيسية للموقع",
+        href: "/dashboard/teacher/homepage",
+    },
     {
         icon: List,
         label: "الكورسات",
