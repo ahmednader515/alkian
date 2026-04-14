@@ -3,140 +3,39 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-    Layout,
     Home,
     Compass,
     Wallet,
     GraduationCap,
     List,
-    FileText,
-    Award,
     Users,
-    Wallet as WalletIcon,
-    BarChart,
-    BookOpen,
-    Key,
-    Calendar,
-    Shield,
     TrendingUp,
-    Eye,
+    BarChart,
     User
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEffect, useMemo, useState } from "react";
+import type { DashboardNavItem, HomePageContent } from "@/lib/home-page-settings";
+import { DEFAULT_HOME_PAGE_CONTENT } from "@/lib/home-page-settings";
 
-const userBottomNavItems = [
-    {
-        id: "courses",
-        icon: Home,
-        label: "الرئيسية",
-        href: "/dashboard",
-    },
-    {
-        id: "balance",
-        icon: Wallet,
-        label: "الرصيد",
-        href: "/dashboard/balance",
-    },
-    {
-        id: "dashboard",
-        icon: Compass,
-        label: "لوحة التحكم",
-        href: "/dashboard/search",
-    },
-    {
-        id: "certificates",
-        icon: GraduationCap,
-        label: "الشهادات",
-        href: "/dashboard/certificates",
-    },
-    {
-        id: "account",
-        icon: User,
-        label: "حسابي",
-        href: "/dashboard/account",
-    },
-];
+const ICONS = {
+  Home,
+  Compass,
+  Wallet,
+  GraduationCap,
+  List,
+  Users,
+  TrendingUp,
+  BarChart,
+  User,
+} as const;
 
-const teacherBottomNavItems = [
-    {
-        id: "courses",
-        icon: List,
-        label: "الكورسات",
-        href: "/dashboard/teacher/courses",
-    },
-    {
-        id: "analytics",
-        icon: BarChart,
-        label: "الاحصائيات",
-        href: "/dashboard/teacher/analytics",
-    },
-    {
-        id: "dashboard",
-        icon: Home,
-        label: "لوحة التحكم",
-        href: "/dashboard/teacher",
-    },
-    {
-        id: "certificates",
-        icon: GraduationCap,
-        label: "الشهادات",
-        href: "/dashboard/teacher/certificates",
-    },
-    {
-        id: "account",
-        icon: User,
-        label: "حسابي",
-        href: "/dashboard/teacher/account",
-    },
-];
-
-const adminBottomNavItems = [
-    {
-        id: "users",
-        icon: Users,
-        label: "المستخدمين",
-        href: "/dashboard/admin/users",
-    },
-    {
-        id: "courses",
-        icon: List,
-        label: "الكورسات",
-        href: "/dashboard/admin/courses",
-    },
-    {
-        id: "dashboard",
-        icon: Home,
-        label: "لوحة التحكم",
-        href: "/dashboard/admin",
-    },
-    {
-        id: "progress",
-        icon: TrendingUp,
-        label: "تقدم الطلاب",
-        href: "/dashboard/admin/progress",
-    },
-    {
-        id: "account",
-        icon: User,
-        label: "حسابي",
-        href: "/dashboard/admin/account",
-    },
-];
-
-const guestBottomNavItems = [
-    {
-        id: "home",
-        icon: Home,
-        label: "الرئيسية",
-        href: "/dashboard/guest",
-    },
-    {
-        id: "account",
-        icon: User,
-        label: "حسابي",
-        href: "/dashboard/guest/account",
-    },
-];
+function toRenderable(items: DashboardNavItem[]) {
+  return items.map((item) => ({
+    ...item,
+    icon: ICONS[(item.icon as keyof typeof ICONS) ?? "Home"] ?? Home,
+  }));
+}
 
 export const BottomNav = () => {
     const pathname = usePathname();
@@ -145,13 +44,31 @@ export const BottomNav = () => {
     const isAdminPage = pathname?.startsWith("/dashboard/admin");
     const isGuestPage = pathname?.startsWith("/dashboard/guest");
 
-    const bottomNavItems = isAdminPage
-        ? adminBottomNavItems
-        : isTeacherPage
-            ? teacherBottomNavItems
-            : isGuestPage
-                ? guestBottomNavItems
-                : userBottomNavItems;
+    const [settings, setSettings] = useState<HomePageContent>(DEFAULT_HOME_PAGE_CONTENT);
+
+    useEffect(() => {
+      let cancelled = false;
+      (async () => {
+        try {
+          const res = await fetch("/api/public/homepage-settings", { cache: "no-store" });
+          const json = (await res.json()) as { data?: HomePageContent };
+          if (!cancelled && json?.data) setSettings(json.data);
+        } catch {
+          // keep defaults
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, []);
+
+    const bottomNavItems = useMemo(() => {
+      const nav = settings.dashboardNav;
+      if (isAdminPage) return toRenderable(nav.admin);
+      if (isTeacherPage) return toRenderable(nav.teacher);
+      if (isGuestPage) return toRenderable(nav.guest);
+      return toRenderable(nav.user);
+    }, [settings.dashboardNav, isAdminPage, isTeacherPage, isGuestPage]);
 
     // For guest pages with only 2 items, show them evenly without floating button
     const isGuestNav = isGuestPage && bottomNavItems.length <= 2;
@@ -166,7 +83,7 @@ export const BottomNav = () => {
     const rightItems = bottomNavItems.slice(middleIndex + 1);
 
     // Helper function to check if a button is active
-    const isButtonActive = (item: typeof bottomNavItems[0]) => {
+    const isButtonActive = (item: (typeof bottomNavItems)[0]) => {
         // For dashboard/home button, only match exact path
         if (item.href === "/dashboard" || item.href === "/dashboard/teacher" || item.href === "/dashboard/admin" || item.href === "/dashboard/guest") {
             return pathname === item.href;

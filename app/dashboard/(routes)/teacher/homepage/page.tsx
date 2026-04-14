@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileUpload } from "@/components/file-upload";
 import type { HomePageContent } from "@/lib/home-page-settings";
-import { DEFAULT_HOME_PAGE_CONTENT } from "@/lib/home-page-settings";
+import { DEFAULT_HOME_PAGE_CONTENT, mergeHomePageContent } from "@/lib/home-page-settings";
 
 export default function TeacherHomePageSettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ export default function TeacherHomePageSettingsPage() {
     (async () => {
       try {
         const res = await axios.get<{ data: HomePageContent }>("/api/teacher/homepage-settings");
-        if (!cancelled && res.data?.data) setData(res.data.data);
+        if (!cancelled && res.data?.data) setData(mergeHomePageContent(res.data.data as any));
       } catch {
         toast.error("تعذر تحميل إعدادات الصفحة الرئيسية");
       } finally {
@@ -69,7 +69,7 @@ export default function TeacherHomePageSettingsPage() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-6 overflow-x-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">الصفحة الرئيسية للموقع</h1>
@@ -83,15 +83,18 @@ export default function TeacherHomePageSettingsPage() {
         </Button>
       </div>
 
-      <Tabs defaultValue="theme" dir="rtl" className="w-full">
-        <TabsList className="flex flex-wrap h-auto gap-1">
-          <TabsTrigger value="theme">الألوان</TabsTrigger>
-          <TabsTrigger value="media">الشعار والصور</TabsTrigger>
-          <TabsTrigger value="dashboard">بانر الداشبورد</TabsTrigger>
-          <TabsTrigger value="hero">قسم منطقة البداية</TabsTrigger>
-          <TabsTrigger value="sections">عناوين الأقسام</TabsTrigger>
-          <TabsTrigger value="sessions">جلسات الحجز</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="theme" dir="rtl" className="w-full min-w-0">
+        <div className="w-full max-w-full min-w-0 overflow-x-auto overflow-y-hidden overscroll-x-contain touch-pan-x">
+          <TabsList className="flex w-max min-w-max flex-nowrap gap-1 justify-start rtl:justify-end">
+            <TabsTrigger value="theme" className="shrink-0">الألوان</TabsTrigger>
+            <TabsTrigger value="media" className="shrink-0">الشعار والصور</TabsTrigger>
+            <TabsTrigger value="dashboard" className="shrink-0">بانر الداشبورد</TabsTrigger>
+            <TabsTrigger value="dash-big" className="shrink-0">أزرار الداشبورد الكبيرة</TabsTrigger>
+            <TabsTrigger value="hero" className="shrink-0">قسم منطقة البداية</TabsTrigger>
+            <TabsTrigger value="sections" className="shrink-0">عناوين الأقسام</TabsTrigger>
+            <TabsTrigger value="sessions" className="shrink-0">جلسات الحجز</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="theme" className="mt-4 space-y-4">
           <Card>
@@ -195,6 +198,99 @@ export default function TeacherHomePageSettingsPage() {
                 value={data.dashboardBannerUrl}
                 onChange={(e) => setField("dashboardBannerUrl", e.target.value)}
               />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="dash-big" className="mt-4 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>أزرار الداشبورد الكبيرة (الصفحات الرئيسية)</CardTitle>
+              <CardDescription>
+                هذه هي البطاقات الكبيرة في صفحة `/dashboard/teacher` و `/dashboard/admin`. يمكن تغيير الاسم ورفع أيقونة (صورة) لكل بطاقة.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-10 w-full max-w-full min-w-0 overflow-x-hidden">
+              {(
+                [
+                  ["teacher", "Teacher Dashboard"],
+                  ["admin", "Admin Dashboard"],
+                  ["user", "User Dashboard"],
+                ] as const
+              ).map(([roleKey, roleLabel]) => (
+                <details key={roleKey} className="rounded-xl border bg-card w-full max-w-full min-w-0" open>
+                  <summary className="cursor-pointer select-none px-4 py-3 font-semibold" dir="ltr">
+                    {roleLabel}
+                  </summary>
+                  <div className="p-4 space-y-4 w-full max-w-full min-w-0">
+                    {(data.dashboardBigButtons?.[roleKey] ?? []).map((item, idx) => (
+                      <div key={item.id} className="rounded-lg border p-4 space-y-3 w-full max-w-full min-w-0 overflow-x-hidden">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                          <code className="text-xs bg-muted px-2 py-1 rounded" dir="ltr">
+                            {item.id}
+                          </code>
+                          <code className="text-xs bg-muted px-2 py-1 rounded w-full sm:max-w-[60%] overflow-hidden text-ellipsis whitespace-nowrap" dir="ltr">
+                            {item.href}
+                          </code>
+                        </div>
+
+                        <div className="grid sm:grid-cols-2 gap-3 w-full max-w-full min-w-0">
+                          <div className="space-y-2 min-w-0">
+                            <Label>الاسم</Label>
+                            <Input
+                              className="w-full max-w-full min-w-0"
+                              value={item.label}
+                              onChange={(e) => {
+                                const label = e.target.value;
+                                setData((prev) => {
+                                  const next = { ...prev };
+                                  const list = [...next.dashboardBigButtons[roleKey]];
+                                  list[idx] = { ...list[idx], label };
+                                  next.dashboardBigButtons = { ...next.dashboardBigButtons, [roleKey]: list };
+                                  return next;
+                                });
+                              }}
+                            />
+                          </div>
+                          <div className="space-y-2 min-w-0">
+                            <Label>أيقونة (صورة)</Label>
+                            <FileUpload
+                              endpoint="courseImage"
+                              value={item.iconUrl?.startsWith("http") ? item.iconUrl : undefined}
+                              className="w-full max-w-full min-w-0"
+                              onChange={(url) => {
+                                setData((prev) => {
+                                  const next = { ...prev };
+                                  const list = [...next.dashboardBigButtons[roleKey]];
+                                  list[idx] = { ...list[idx], iconUrl: url ?? "" };
+                                  next.dashboardBigButtons = { ...next.dashboardBigButtons, [roleKey]: list };
+                                  return next;
+                                });
+                              }}
+                            />
+                            <Input
+                              dir="ltr"
+                              placeholder="رابط الأيقونة"
+                              className="w-full max-w-full min-w-0"
+                              value={item.iconUrl}
+                              onChange={(e) => {
+                                const iconUrl = e.target.value;
+                                setData((prev) => {
+                                  const next = { ...prev };
+                                  const list = [...next.dashboardBigButtons[roleKey]];
+                                  list[idx] = { ...list[idx], iconUrl };
+                                  next.dashboardBigButtons = { ...next.dashboardBigButtons, [roleKey]: list };
+                                  return next;
+                                });
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              ))}
             </CardContent>
           </Card>
         </TabsContent>

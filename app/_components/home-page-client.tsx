@@ -302,7 +302,7 @@ export function HomePageClient({
           >
             <div className="flex flex-col items-center justify-center mb-8">
               <div 
-                className="relative w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-xl cursor-pointer group"
+                className="relative w-56 h-56 md:w-72 md:h-72 rounded-full overflow-hidden border-4 border-white shadow-xl cursor-pointer group"
                 onClick={() => openImageModal(content.teacherImageUrl)}
                 onTouchStart={(e) => handleImageTouchStart(e, content.teacherImageUrl)}
                 onTouchEnd={(e) => handleImageTouchEnd(e, content.teacherImageUrl)}
@@ -312,7 +312,7 @@ export function HomePageClient({
                   src={content.teacherImageUrl}
                   alt={content.teacherImageAlt}
                   fill
-                  className="object-cover transition-transform group-hover:scale-105 pointer-events-none"
+                  className="object-contain bg-white/10 transition-transform group-hover:scale-105 pointer-events-none"
                   priority
                   unoptimized={content.teacherImageUrl.startsWith("http")}
                 />

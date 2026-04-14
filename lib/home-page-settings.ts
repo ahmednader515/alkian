@@ -3,6 +3,33 @@ import { Prisma } from "@prisma/client";
 
 export type SessionCard = { name: string; id: string };
 
+export type DashboardNavItem = {
+  id: string;
+  label: string;
+  icon: string; // lucide icon name
+  href: string;
+};
+
+export type DashboardNavConfig = {
+  user: DashboardNavItem[];
+  teacher: DashboardNavItem[];
+  admin: DashboardNavItem[];
+  guest: DashboardNavItem[];
+};
+
+export type DashboardBigButton = {
+  id: string;
+  label: string;
+  iconUrl: string;
+  href: string;
+};
+
+export type DashboardBigButtonsConfig = {
+  teacher: DashboardBigButton[];
+  admin: DashboardBigButton[];
+  user: DashboardBigButton[];
+};
+
 export type HomePageContent = {
   themePrimary: string;
   themeNavbar: string;
@@ -10,6 +37,8 @@ export type HomePageContent = {
   themeGradientTo: string;
   logoUrl: string;
   dashboardBannerUrl: string;
+  dashboardNav: DashboardNavConfig;
+  dashboardBigButtons: DashboardBigButtonsConfig;
   teacherImageUrl: string;
   teacherImageAlt: string;
   teacherName: string;
@@ -74,6 +103,93 @@ export const DEFAULT_HOME_PAGE_CONTENT: HomePageContent = {
   themeGradientTo: "#3b82f6",
   logoUrl: "/logo.png",
   dashboardBannerUrl: "/dashboard-banner.png",
+  dashboardNav: {
+    user: [
+      { id: "courses", icon: "Home", label: "الرئيسية", href: "/dashboard" },
+      { id: "balance", icon: "Wallet", label: "الرصيد", href: "/dashboard/balance" },
+      { id: "dashboard", icon: "Compass", label: "لوحة التحكم", href: "/dashboard/search" },
+      { id: "certificates", icon: "GraduationCap", label: "الشهادات", href: "/dashboard/certificates" },
+      { id: "account", icon: "User", label: "حسابي", href: "/dashboard/account" },
+    ],
+    teacher: [
+      { id: "courses", icon: "List", label: "الكورسات", href: "/dashboard/teacher/courses" },
+      { id: "analytics", icon: "BarChart", label: "الاحصائيات", href: "/dashboard/teacher/analytics" },
+      { id: "dashboard", icon: "Home", label: "لوحة التحكم", href: "/dashboard/teacher" },
+      { id: "certificates", icon: "GraduationCap", label: "الشهادات", href: "/dashboard/teacher/certificates" },
+      { id: "account", icon: "User", label: "حسابي", href: "/dashboard/teacher/account" },
+    ],
+    admin: [
+      { id: "users", icon: "Users", label: "المستخدمين", href: "/dashboard/admin/users" },
+      { id: "courses", icon: "List", label: "الكورسات", href: "/dashboard/admin/courses" },
+      { id: "dashboard", icon: "Home", label: "لوحة التحكم", href: "/dashboard/admin" },
+      { id: "progress", icon: "TrendingUp", label: "تقدم الطلاب", href: "/dashboard/admin/progress" },
+      { id: "account", icon: "User", label: "حسابي", href: "/dashboard/admin/account" },
+    ],
+    guest: [
+      { id: "home", icon: "Home", label: "الرئيسية", href: "/dashboard/guest" },
+      { id: "account", icon: "User", label: "حسابي", href: "/dashboard/guest/account" },
+    ],
+  },
+  dashboardBigButtons: {
+    teacher: [
+      { id: "homepage", label: "الصفحة الرئيسية للموقع", iconUrl: "", href: "/dashboard/teacher/homepage" },
+      { id: "courses", label: "الكورسات", iconUrl: "", href: "/dashboard/teacher/courses" },
+      { id: "quizzes", label: "الاختبارات", iconUrl: "", href: "/dashboard/teacher/quizzes" },
+      { id: "grades", label: "الدرجات", iconUrl: "", href: "/dashboard/teacher/grades" },
+      { id: "analytics", label: "الاحصائيات", iconUrl: "", href: "/dashboard/teacher/analytics" },
+      { id: "users", label: "إدارة الطلاب", iconUrl: "", href: "/dashboard/teacher/users" },
+      { id: "balances", label: "إدارة الأرصدة", iconUrl: "", href: "/dashboard/teacher/balances" },
+      { id: "add-courses", label: "إضافة / حذف كورسات", iconUrl: "", href: "/dashboard/teacher/add-courses" },
+      { id: "passwords", label: "كلمات المرور", iconUrl: "", href: "/dashboard/teacher/passwords" },
+      { id: "certificates", label: "إدارة الشهادات", iconUrl: "", href: "/dashboard/teacher/certificates" },
+      { id: "reservations", label: "إدارة الحجوزات", iconUrl: "", href: "/dashboard/teacher/reservations" },
+      { id: "certificate-templates", label: "نموذج للشهادات", iconUrl: "", href: "/dashboard/teacher/content/certificate-templates" },
+      { id: "about-us", label: "اعرفنا أكثر", iconUrl: "", href: "/dashboard/teacher/content/about-us" },
+      { id: "general-news", label: "أخبار عامة", iconUrl: "", href: "/dashboard/teacher/content/general-news" },
+      { id: "about-lecturers", label: "نبذة عن المحاضرين", iconUrl: "", href: "/dashboard/teacher/content/about-lecturers" },
+      { id: "goals-achievements", label: "هدفنا وإنجازاتنا", iconUrl: "", href: "/dashboard/teacher/content/goals-achievements" },
+      { id: "our-branches", label: "فروعنا", iconUrl: "", href: "/dashboard/teacher/content/our-branches" },
+      { id: "create-account", label: "إنشاء حساب طالب", iconUrl: "", href: "/dashboard/teacher/create-account" },
+      { id: "online-course-registrations", label: "طلبات التسجيل في الكورسات", iconUrl: "", href: "/dashboard/teacher/online-course-registrations" },
+      { id: "membership-job-requests", label: "طلبات العضوية والوظيفة", iconUrl: "", href: "/dashboard/teacher/membership-job-requests" },
+      { id: "renewal-requests", label: "طلبات التجديد", iconUrl: "", href: "/dashboard/teacher/renewal-requests" },
+      { id: "complaints", label: "الشكاوى", iconUrl: "", href: "/dashboard/teacher/complaints" },
+      { id: "services", label: "إدارة الخدمات", iconUrl: "", href: "/dashboard/teacher/services" },
+      { id: "certificate-details", label: "بيانات الشهادات", iconUrl: "", href: "/dashboard/teacher/certificate-details" },
+      { id: "accreditations", label: "الاعتمادات", iconUrl: "", href: "/dashboard/teacher/accreditations" },
+      { id: "general-services", label: "الخدمات العامة", iconUrl: "", href: "/dashboard/teacher/general-services" },
+    ],
+    admin: [
+      { id: "dashboard", label: "لوحة التحكم", iconUrl: "", href: "/dashboard/admin" },
+      { id: "users", label: "إدارة المستخدمين", iconUrl: "", href: "/dashboard/admin/users" },
+      { id: "courses", label: "إدارة الكورسات", iconUrl: "", href: "/dashboard/admin/courses" },
+      { id: "quizzes", label: "الاختبارات", iconUrl: "", href: "/dashboard/admin/quizzes" },
+      { id: "create-account", label: "إنشاء حساب طالب", iconUrl: "", href: "/dashboard/admin/create-account" },
+      { id: "passwords", label: "كلمات المرور", iconUrl: "", href: "/dashboard/admin/passwords" },
+      { id: "balances", label: "إدارة الأرصدة", iconUrl: "", href: "/dashboard/admin/balances" },
+      { id: "progress", label: "تقدم الطلاب", iconUrl: "", href: "/dashboard/admin/progress" },
+      { id: "add-courses", label: "إضافة / حذف كورسات", iconUrl: "", href: "/dashboard/admin/add-courses" },
+    ],
+    user: [
+      { id: "1", label: "خدماتنا", iconUrl: "", href: "/dashboard/services" },
+      { id: "2", label: "الاعتمادات", iconUrl: "", href: "/dashboard/accreditations" },
+      { id: "3", label: "الشهادات", iconUrl: "", href: "/dashboard/certificates-details" },
+      { id: "4", label: "الجلسات", iconUrl: "", href: "/dashboard/sessions" },
+      { id: "5", label: "الخدمات العامة", iconUrl: "", href: "/dashboard/general-services" },
+      { id: "6", label: "نموذج للشهادات", iconUrl: "", href: "/dashboard/content/certificate-templates" },
+      { id: "7", label: "اعرفنا اكثر", iconUrl: "", href: "/dashboard/content/about-us" },
+      { id: "8", label: "تسجيل في كورس اونلاين", iconUrl: "", href: "/dashboard/register-course" },
+      { id: "9", label: "طلب عضوية و وظيفة", iconUrl: "", href: "/dashboard/membership-job-request" },
+      { id: "10", label: "اخبار عامة", iconUrl: "", href: "/dashboard/content/general-news" },
+      { id: "11", label: "الاختبارات", iconUrl: "", href: "/dashboard/content/tests" },
+      { id: "12", label: "نبذه عن المحاضرين", iconUrl: "", href: "/dashboard/content/about-lecturers" },
+      { id: "13", label: "طلب تجديد", iconUrl: "", href: "/dashboard/renewal-request" },
+      { id: "14", label: "هدفنا وانجازتنا", iconUrl: "", href: "/dashboard/content/goals-achievements" },
+      { id: "15", label: "تقديم شكوى", iconUrl: "", href: "/dashboard/complaint" },
+      { id: "16", label: "الكورسات المسجلة", iconUrl: "", href: "/dashboard/my-courses" },
+      { id: "17", label: "فروعنا", iconUrl: "", href: "/dashboard/content/our-branches" },
+    ],
+  },
   teacherImageUrl: "/teacher-image.png",
   teacherImageAlt: "Mr/ Mohamed khaled hassan",
   teacherName: "Mr/ Mohamed khaled hassan",
@@ -164,6 +280,75 @@ function isHexColor(s: string): boolean {
   return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(s.trim());
 }
 
+function normalizeDashboardNav(input: unknown): DashboardNavConfig {
+  const defaults = DEFAULT_HOME_PAGE_CONTENT.dashboardNav;
+  if (!input || typeof input !== "object" || Array.isArray(input)) return defaults;
+  const obj = input as Record<string, unknown>;
+
+  const normalizeList = (key: keyof DashboardNavConfig): DashboardNavItem[] => {
+    const def = defaults[key];
+    const raw = obj[key];
+    if (!Array.isArray(raw)) return def;
+    const byId = new Map<string, Partial<DashboardNavItem>>();
+    for (const row of raw) {
+      if (!row || typeof row !== "object") continue;
+      const r = row as Partial<DashboardNavItem>;
+      if (typeof r.id !== "string") continue;
+      byId.set(r.id, r);
+    }
+    return def.map((d) => {
+      const r = byId.get(d.id);
+      return {
+        id: d.id,
+        href: d.href,
+        label: typeof r?.label === "string" && r.label.trim() ? r.label : d.label,
+        icon: typeof r?.icon === "string" && r.icon.trim() ? r.icon : d.icon,
+      };
+    });
+  };
+
+  return {
+    user: normalizeList("user"),
+    teacher: normalizeList("teacher"),
+    admin: normalizeList("admin"),
+    guest: normalizeList("guest"),
+  };
+}
+
+function normalizeDashboardBigButtons(input: unknown): DashboardBigButtonsConfig {
+  const defaults = DEFAULT_HOME_PAGE_CONTENT.dashboardBigButtons;
+  if (!input || typeof input !== "object" || Array.isArray(input)) return defaults;
+  const obj = input as Record<string, unknown>;
+
+  const normalizeList = (key: keyof DashboardBigButtonsConfig): DashboardBigButton[] => {
+    const def = defaults[key];
+    const raw = obj[key];
+    if (!Array.isArray(raw)) return def;
+    const byId = new Map<string, Partial<DashboardBigButton>>();
+    for (const row of raw) {
+      if (!row || typeof row !== "object") continue;
+      const r = row as Partial<DashboardBigButton>;
+      if (typeof r.id !== "string") continue;
+      byId.set(r.id, r);
+    }
+    return def.map((d) => {
+      const r = byId.get(d.id);
+      return {
+        id: d.id,
+        href: d.href,
+        label: typeof r?.label === "string" && r.label.trim() ? r.label : d.label,
+        iconUrl: typeof r?.iconUrl === "string" ? r.iconUrl : d.iconUrl,
+      };
+    });
+  };
+
+  return {
+    teacher: normalizeList("teacher"),
+    admin: normalizeList("admin"),
+    user: normalizeList("user"),
+  };
+}
+
 export function mergeHomePageContent(raw: Prisma.JsonValue | null | undefined): HomePageContent {
   const merged: HomePageContent = { ...DEFAULT_HOME_PAGE_CONTENT };
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
@@ -176,6 +361,14 @@ export function mergeHomePageContent(raw: Prisma.JsonValue | null | undefined): 
   (Object.keys(DEFAULT_HOME_PAGE_CONTENT) as (keyof HomePageContent)[]).forEach((key) => {
     if (key === "sessionCards") {
       merged.sessionCards = normalizeSessionCards(obj.sessionCards);
+      return;
+    }
+    if (key === "dashboardNav") {
+      merged.dashboardNav = normalizeDashboardNav(obj.dashboardNav);
+      return;
+    }
+    if (key === "dashboardBigButtons") {
+      merged.dashboardBigButtons = normalizeDashboardBigButtons(obj.dashboardBigButtons);
       return;
     }
     const v = str(key);

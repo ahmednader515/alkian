@@ -12,6 +12,13 @@ export const contentType = 'image/png';
 
 // Image generation
 export default async function Icon() {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXTAUTH_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+    'http://localhost:3000';
+  const logoUrl = new URL('/logo.png', baseUrl).toString();
+
   return new ImageResponse(
     (
       // ImageResponse JSX element
@@ -27,7 +34,7 @@ export default async function Icon() {
         }}
       >
         <img
-          src="/logo.png"
+          src={logoUrl}
           alt="Logo"
           style={{
             width: '100%',

@@ -1,6 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import type { DashboardBigButton, HomePageContent } from "@/lib/home-page-settings";
+import { DEFAULT_HOME_PAGE_CONTENT } from "@/lib/home-page-settings";
 import {
     Home,
     List,
@@ -23,150 +28,65 @@ import {
     AlertCircle,
     Briefcase,
     MapPin,
-    Globe
+    Globe,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
-const services = [
-    {
-        icon: Home,
-        label: "الصفحة الرئيسية للموقع",
-        href: "/dashboard/teacher/homepage",
-    },
-    {
-        icon: List,
-        label: "الكورسات",
-        href: "/dashboard/teacher/courses",
-    },
-    {
-        icon: FileText,
-        label: "الاختبارات",
-        href: "/dashboard/teacher/quizzes",
-    },
-    {
-        icon: Award,
-        label: "الدرجات",
-        href: "/dashboard/teacher/grades",
-    },
-    {
-        icon: BarChart,
-        label: "الاحصائيات",
-        href: "/dashboard/teacher/analytics",
-    },
-    {
-        icon: Users,
-        label: "إدارة الطلاب",
-        href: "/dashboard/teacher/users",
-    },
-    {
-        icon: Wallet,
-        label: "إدارة الأرصدة",
-        href: "/dashboard/teacher/balances",
-    },
-    {
-        icon: BookOpen,
-        label: "إضافة / حذف كورسات",
-        href: "/dashboard/teacher/add-courses",
-    },
-    {
-        icon: Key,
-        label: "كلمات المرور",
-        href: "/dashboard/teacher/passwords",
-    },
-    {
-        icon: GraduationCap,
-        label: "إدارة الشهادات",
-        href: "/dashboard/teacher/certificates",
-    },
-    {
-        icon: Calendar,
-        label: "إدارة الحجوزات",
-        href: "/dashboard/teacher/reservations",
-    },
-    {
-        icon: FileCheck,
-        label: "نموذج للشهادات",
-        href: "/dashboard/teacher/content/certificate-templates",
-    },
-    {
-        icon: UserCircle,
-        label: "اعرفنا أكثر",
-        href: "/dashboard/teacher/content/about-us",
-    },
-    {
-        icon: Newspaper,
-        label: "أخبار عامة",
-        href: "/dashboard/teacher/content/general-news",
-    },
-    {
-        icon: Users,
-        label: "نبذة عن المحاضرين",
-        href: "/dashboard/teacher/content/about-lecturers",
-    },
-    {
-        icon: Target,
-        label: "هدفنا وإنجازاتنا",
-        href: "/dashboard/teacher/content/goals-achievements",
-    },
-    {
-        icon: MapPin,
-        label: "فروعنا",
-        href: "/dashboard/teacher/content/our-branches",
-    },
-    {
-        icon: Shield,
-        label: "إنشاء حساب طالب",
-        href: "/dashboard/teacher/create-account",
-    },
-    {
-        icon: BookOpen,
-        label: "طلبات التسجيل في الكورسات",
-        href: "/dashboard/teacher/online-course-registrations",
-    },
-    {
-        icon: UserPlus,
-        label: "طلبات العضوية والوظيفة",
-        href: "/dashboard/teacher/membership-job-requests",
-    },
-    {
-        icon: RefreshCw,
-        label: "طلبات التجديد",
-        href: "/dashboard/teacher/renewal-requests",
-    },
-    {
-        icon: AlertCircle,
-        label: "الشكاوى",
-        href: "/dashboard/teacher/complaints",
-    },
-    {
-        icon: Briefcase,
-        label: "إدارة الخدمات",
-        href: "/dashboard/teacher/services",
-    },
-    {
-        icon: GraduationCap,
-        label: "بيانات الشهادات",
-        href: "/dashboard/teacher/certificate-details",
-    },
-    {
-        icon: Award,
-        label: "الاعتمادات",
-        href: "/dashboard/teacher/accreditations",
-    },
-    {
-        icon: Globe,
-        label: "الخدمات العامة",
-        href: "/dashboard/teacher/general-services",
-    },
-];
+const FALLBACK = DEFAULT_HOME_PAGE_CONTENT.dashboardBigButtons.teacher;
+
+const DEFAULT_ICONS: Record<string, (props: { className?: string }) => JSX.Element> = {
+    homepage: Home,
+    courses: List,
+    quizzes: FileText,
+    grades: Award,
+    analytics: BarChart,
+    users: Users,
+    balances: Wallet,
+    "add-courses": BookOpen,
+    passwords: Key,
+    certificates: GraduationCap,
+    reservations: Calendar,
+    "certificate-templates": FileCheck,
+    "about-us": UserCircle,
+    "general-news": Newspaper,
+    "about-lecturers": Users,
+    "goals-achievements": Target,
+    "our-branches": MapPin,
+    "create-account": Shield,
+    "online-course-registrations": BookOpen,
+    "membership-job-requests": UserPlus,
+    "renewal-requests": RefreshCw,
+    complaints: AlertCircle,
+    services: Briefcase,
+    "certificate-details": GraduationCap,
+    accreditations: Award,
+    "general-services": Globe,
+};
 
 export const TeacherMainServices = () => {
+    const [items, setItems] = useState<DashboardBigButton[]>(FALLBACK);
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch("/api/public/homepage-settings", { cache: "no-store" });
+                const json = (await res.json()) as { data?: HomePageContent };
+                const next = json?.data?.dashboardBigButtons?.teacher;
+                if (!cancelled && Array.isArray(next) && next.length) setItems(next);
+            } catch {
+                // keep fallback
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
     return (
         <div className="p-6 bg-white">
             <h2 className="text-2xl font-bold mb-6 text-red-600">الخدمات الرئيسية</h2>
             <div className="grid grid-cols-3 gap-4 max-w-5xl mx-auto">
-                {services.map((service, index) => {
-                    const Icon = service.icon;
+                {items.map((service, index) => {
                     return (
                         <Link
                             key={index}
@@ -176,7 +96,22 @@ export const TeacherMainServices = () => {
                             )}
                         >
                             <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-50 mb-3">
-                                <Icon className="h-8 w-8 text-red-600" />
+                                {service.iconUrl ? (
+                                    <div className="relative w-10 h-10">
+                                        <Image
+                                            src={service.iconUrl}
+                                            alt={service.label}
+                                            fill
+                                            className="object-contain"
+                                            unoptimized={service.iconUrl.startsWith("http")}
+                                        />
+                                    </div>
+                                ) : (
+                                    (() => {
+                                        const Icon = DEFAULT_ICONS[service.id] ?? Home;
+                                        return <Icon className="h-8 w-8 text-red-600" />;
+                                    })()
+                                )}
                             </div>
                             <span className="text-sm font-medium text-center leading-tight">{service.label}</span>
                         </Link>

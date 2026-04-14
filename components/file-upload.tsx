@@ -14,17 +14,19 @@ interface FileUploadProps {
     value?: string;
     endpoint: keyof typeof ourFileRouter;
     accept?: string;
+    className?: string;
 }
 
 export const FileUpload = ({
     onChange,
     value,
     endpoint,
-    accept = "image/*"
+    accept = "image/*",
+    className,
 }: FileUploadProps) => {
     const [isUploading, setIsUploading] = useState(false);
 
-    const handleUploadComplete = (res: any) => {
+const handleUploadComplete = (res: any) => {
         setIsUploading(false);
         if (res && res[0]) {
             const url = res[0].ufsUrl || res[0].url;
@@ -86,17 +88,20 @@ export const FileUpload = ({
     }
 
     return (
-        <div className="space-y-2">
+        <div className={["space-y-2 w-full max-w-full min-w-0", className].filter(Boolean).join(" ")}>
             <UploadDropzone
                 endpoint={endpoint}
                 onClientUploadComplete={handleUploadComplete}
                 onUploadError={handleUploadError}
                 onUploadBegin={() => setIsUploading(true)}
                 appearance={{
-                    container: "border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-gray-400 transition-colors",
+                    container:
+                        "w-full max-w-full min-w-0 box-border border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-gray-400 transition-colors overflow-hidden [&_*]:max-w-full [&_*]:min-w-0",
                     uploadIcon: "text-gray-400",
                     label: "text-gray-600 font-medium",
                     allowedContent: "text-gray-500 text-sm",
+                    button:
+                        "w-full max-w-full min-w-0",
                 }}
                 content={{
                     uploadIcon: isUploading ? (
