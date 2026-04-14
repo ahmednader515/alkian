@@ -87,6 +87,7 @@ export default function TeacherHomePageSettingsPage() {
         <TabsList className="flex flex-wrap h-auto gap-1">
           <TabsTrigger value="theme">الألوان</TabsTrigger>
           <TabsTrigger value="media">الشعار والصور</TabsTrigger>
+          <TabsTrigger value="dashboard">بانر الداشبورد</TabsTrigger>
           <TabsTrigger value="hero">قسم منطقة البداية</TabsTrigger>
           <TabsTrigger value="sections">عناوين الأقسام</TabsTrigger>
           <TabsTrigger value="sessions">جلسات الحجز</TabsTrigger>
@@ -140,7 +141,11 @@ export default function TeacherHomePageSettingsPage() {
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label>شعار الموقع (يظهر في الشريط العلوي)</Label>
-                <FileUpload endpoint="courseImage" value={data.logoUrl.startsWith("http") ? data.logoUrl : undefined} onChange={(url) => url && setField("logoUrl", url)} />
+                <FileUpload
+                  endpoint="courseImage"
+                  value={data.logoUrl.startsWith("http") ? data.logoUrl : undefined}
+                  onChange={(url) => setField("logoUrl", url ?? "")}
+                />
                 <Input
                   dir="ltr"
                   placeholder="/logo.png أو رابط كامل"
@@ -153,7 +158,7 @@ export default function TeacherHomePageSettingsPage() {
                 <FileUpload
                   endpoint="courseImage"
                   value={data.teacherImageUrl.startsWith("http") ? data.teacherImageUrl : undefined}
-                  onChange={(url) => url && setField("teacherImageUrl", url)}
+                  onChange={(url) => setField("teacherImageUrl", url ?? "")}
                 />
                 <Input dir="ltr" value={data.teacherImageUrl} onChange={(e) => setField("teacherImageUrl", e.target.value)} />
               </div>
@@ -162,10 +167,34 @@ export default function TeacherHomePageSettingsPage() {
                 <FileUpload
                   endpoint="courseImage"
                   value={data.itcImageUrl.startsWith("http") ? data.itcImageUrl : undefined}
-                  onChange={(url) => url && setField("itcImageUrl", url)}
+                  onChange={(url) => setField("itcImageUrl", url ?? "")}
                 />
                 <Input dir="ltr" value={data.itcImageUrl} onChange={(e) => setField("itcImageUrl", e.target.value)} />
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="dashboard" className="mt-4 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>بانر أعلى صفحات الداشبورد</CardTitle>
+              <CardDescription>
+                هذه الصورة تظهر أعلى صفحات الداشبورد (Teacher/User/Admin/Guest). يفضل رفع صورة عريضة (مثل 1920×400).
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <FileUpload
+                endpoint="courseImage"
+                value={data.dashboardBannerUrl?.startsWith("http") ? data.dashboardBannerUrl : undefined}
+                onChange={(url) => setField("dashboardBannerUrl", url ?? "")}
+              />
+              <Input
+                dir="ltr"
+                placeholder="/dashboard-banner.png أو رابط كامل"
+                value={data.dashboardBannerUrl}
+                onChange={(e) => setField("dashboardBannerUrl", e.target.value)}
+              />
             </CardContent>
           </Card>
         </TabsContent>

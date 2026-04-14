@@ -9,6 +9,7 @@ export type HomePageContent = {
   themeGradientVia: string;
   themeGradientTo: string;
   logoUrl: string;
+  dashboardBannerUrl: string;
   teacherImageUrl: string;
   teacherImageAlt: string;
   teacherName: string;
@@ -72,6 +73,7 @@ export const DEFAULT_HOME_PAGE_CONTENT: HomePageContent = {
   themeGradientVia: "#1e3a8a",
   themeGradientTo: "#3b82f6",
   logoUrl: "/logo.png",
+  dashboardBannerUrl: "/dashboard-banner.png",
   teacherImageUrl: "/teacher-image.png",
   teacherImageAlt: "Mr/ Mohamed khaled hassan",
   teacherName: "Mr/ Mohamed khaled hassan",
