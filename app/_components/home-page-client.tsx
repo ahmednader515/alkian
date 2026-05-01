@@ -33,7 +33,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { HomePageContent } from "@/lib/home-page-settings";
-import { homePageCssVars } from "@/lib/home-page-settings";
+import { buildWhatsAppLink, homePageCssVars } from "@/lib/home-page-settings";
 import type { LucideIcon } from "lucide-react";
 
 const SESSION_ICONS: Record<string, LucideIcon> = {
@@ -401,7 +401,8 @@ export function HomePageClient({
           >
             <CoursesCarousel 
               courses={courses} 
-              title={content.coursesCarouselTitle} 
+              title={content.coursesCarouselTitle}
+              contactWhatsappNumber={content.contactWhatsappNumber}
             />
           </motion.div>
         </div>
@@ -560,17 +561,43 @@ export function HomePageClient({
           <div className="text-center mt-8">
             <p className="text-muted-foreground mb-4">{content.certificatesMoreLabel}</p>
             <a 
-              href="https://wa.me/201146450551" 
+              href={buildWhatsAppLink(content.contactWhatsappNumber)}
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 font-semibold"
             >
               <Phone className="h-5 w-5" />
-              {content.certificatesWhatsappLabel}
+              <span>{content.certificatesWhatsappLabel.replace(/[0-9٠-٩]/g, "").trim()}</span>
+              <span dir="ltr">{content.contactWhatsappNumber}</span>
             </a>
+            {content.contactFacebookUrl?.trim() ? (
+              <div className="mt-3">
+                <a
+                  href={content.contactFacebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold"
+                >
+                  <span>Facebook</span>
+                </a>
+              </div>
+            ) : null}
           </div>
         </div>
       </section>
+
+      {/* Floating Facebook button */}
+      {content.contactFacebookUrl?.trim() ? (
+        <a
+          href={content.contactFacebookUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg flex items-center justify-center"
+          aria-label="Facebook"
+        >
+          <span className="font-bold text-lg">f</span>
+        </a>
+      ) : null}
 
       {/* Sessions Booking Section */}
       <section className="py-20">

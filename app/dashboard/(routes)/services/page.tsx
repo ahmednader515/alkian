@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Briefcase, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import axios from "axios";
+import type { HomePageContent } from "@/lib/home-page-settings";
+import { DEFAULT_HOME_PAGE_CONTENT, buildWhatsAppLink } from "@/lib/home-page-settings";
 
 interface Service {
   id: string;
@@ -16,9 +18,26 @@ interface Service {
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [contact, setContact] = useState<HomePageContent>(DEFAULT_HOME_PAGE_CONTENT);
 
   useEffect(() => {
     fetchServices();
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/public/homepage-settings", { cache: "no-store" });
+        const json = (await res.json()) as { data?: HomePageContent };
+        if (!cancelled && json?.data) setContact(json.data);
+      } catch {
+        // keep defaults
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const fetchServices = async () => {
@@ -80,7 +99,7 @@ export default function ServicesPage() {
       {/* WhatsApp Contact Banner */}
       <div className="mt-12 mb-6">
         <a
-          href="https://wa.me/201146450551"
+          href={buildWhatsAppLink(contact.contactWhatsappNumber)}
           target="_blank"
           rel="noopener noreferrer"
           className="block"
@@ -97,7 +116,7 @@ export default function ServicesPage() {
                     لتفاصيل الكورسات
                   </h3>
                   <p className="text-sm md:text-base text-white/90 font-medium">
-                    كلمنا واتس 01146450551
+                    كلمنا واتس {contact.contactWhatsappNumber}
                   </p>
                 </div>
               </div>

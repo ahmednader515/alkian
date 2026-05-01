@@ -20,9 +20,10 @@ interface Course {
 interface CoursesCarouselProps {
   courses: Course[];
   title: string;
+  contactWhatsappNumber?: string;
 }
 
-export default function CoursesCarousel({ courses, title }: CoursesCarouselProps) {
+export default function CoursesCarousel({ courses, title, contactWhatsappNumber }: CoursesCarouselProps) {
   const swiperRef = useRef<any>(null);
 
   const goToPrev = () => {
@@ -157,7 +158,9 @@ export default function CoursesCarousel({ courses, title }: CoursesCarouselProps
                   {/* WhatsApp Contact Text */}
                   <div className={`mt-4 text-center text-sm ${index % 3 === 1 ? 'text-white/90' : 'text-muted-foreground'}`}>
                     <p>لتفاصيل الكورس</p>
-                    <p>كلمنا واتس 01146450551</p>
+                    <p>
+                      كلمنا واتس {contactWhatsappNumber || "01146450551"}
+                    </p>
                   </div>
                 </div>
               </SwiperSlide>

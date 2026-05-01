@@ -1,7 +1,10 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Facebook, Instagram, Twitter, Youtube, Linkedin, MessageCircle } from "lucide-react";
+import { Facebook } from "lucide-react";
+import { useEffect, useState } from "react";
+import type { HomePageContent } from "@/lib/home-page-settings";
+import { DEFAULT_HOME_PAGE_CONTENT, buildWhatsAppLink } from "@/lib/home-page-settings";
 
 // Custom TikTok Icon Component
 const TikTokIcon = ({ className }: { className?: string }) => (
@@ -17,11 +20,28 @@ const TikTokIcon = ({ className }: { className?: string }) => (
 
 export const Footer = () => {
   const pathname = usePathname();
+  const [content, setContent] = useState<HomePageContent>(DEFAULT_HOME_PAGE_CONTENT);
   
   // Hide footer on dashboard pages
   if (pathname?.startsWith('/dashboard')) {
     return null;
   }
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/public/homepage-settings", { cache: "no-store" });
+        const json = (await res.json()) as { data?: HomePageContent };
+        if (!cancelled && json?.data) setContent(json.data);
+      } catch {
+        // keep defaults
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   
   // Check if we're on a page with a sidebar
   const hasSidebar = pathname?.startsWith('/courses');
@@ -35,8 +55,30 @@ export const Footer = () => {
             : ''
         }`}>
           <div className="inline-block bg-[#052c4b]/10 border-2 border-[#052c4b]/20 rounded-lg px-6 py-3 mb-4">
-            <p className="font-semibold text-lg text-[#052c4b]"> واتساب : 01146450551</p>
+            <a
+              href={buildWhatsAppLink(content.contactWhatsappNumber)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-lg text-[#052c4b] inline-flex items-center gap-2"
+            >
+              <span>واتساب :</span>
+              <span dir="ltr">{content.contactWhatsappNumber}</span>
+            </a>
           </div>
+
+          {content.contactFacebookUrl?.trim() ? (
+            <div className="mb-4">
+              <a
+                href={content.contactFacebookUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold"
+              >
+                <Facebook className="h-5 w-5" />
+                <span>Facebook</span>
+              </a>
+            </div>
+          ) : null}
           
           <p>© {new Date().getFullYear()} Mordesu Studio. جميع الحقوق محفوظة</p>
         </div>

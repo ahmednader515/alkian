@@ -94,6 +94,8 @@ export type HomePageContent = {
   ctaSubtitle: string;
   ctaPrimary: string;
   ctaSecondary: string;
+  contactWhatsappNumber: string;
+  contactFacebookUrl: string;
 };
 
 export const DEFAULT_HOME_PAGE_CONTENT: HomePageContent = {
@@ -215,7 +217,7 @@ export const DEFAULT_HOME_PAGE_CONTENT: HomePageContent = {
   accreditation3Subtitle: "شهادة اعتماد رسمية",
   certificatesTitle: "الشهادات",
   certificatesMoreLabel: "لتفاصيل أكثر",
-  certificatesWhatsappLabel: "كلمنا واتس: 01146450551",
+  certificatesWhatsappLabel: "كلمنا واتس:",
   sessionsTitle: "الجلسات",
   sessionsSubtitle: "احجز جلسة مناسبة لك",
   sessionCards: [
@@ -254,7 +256,17 @@ export const DEFAULT_HOME_PAGE_CONTENT: HomePageContent = {
   ctaSubtitle: "احجز موعدك اليوم واستمتع بخدماتنا المتخصصة",
   ctaPrimary: "احجز موعدك الآن",
   ctaSecondary: "تواصل معنا",
+  contactWhatsappNumber: "01146450551",
+  contactFacebookUrl: "",
 };
+
+export function buildWhatsAppLink(input: string): string {
+  const digits = (input || "").replace(/[^0-9]/g, "");
+  if (!digits) return "https://wa.me/";
+  // If it looks like an Egyptian local mobile number (starts with 0), prefix country code 20.
+  const wa = digits.startsWith("0") ? `20${digits.slice(1)}` : digits;
+  return `https://wa.me/${wa}`;
+}
 
 function normalizeSessionCards(input: unknown): SessionCard[] {
   const defaults = DEFAULT_HOME_PAGE_CONTENT.sessionCards;

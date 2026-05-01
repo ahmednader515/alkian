@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageCircle, Check } from "lucide-react";
 import Link from "next/link";
 import axios from "axios";
+import type { HomePageContent } from "@/lib/home-page-settings";
+import { DEFAULT_HOME_PAGE_CONTENT, buildWhatsAppLink } from "@/lib/home-page-settings";
 
 interface CertificateDetail {
   id: string;
@@ -15,11 +17,26 @@ interface CertificateDetail {
 export default function CertificatesDetailsPage() {
   const [certificates, setCertificates] = useState<CertificateDetail[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const whatsappNumber = "01146450551";
-  const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`;
+  const [contact, setContact] = useState<HomePageContent>(DEFAULT_HOME_PAGE_CONTENT);
 
   useEffect(() => {
     fetchCertificates();
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/public/homepage-settings", { cache: "no-store" });
+        const json = (await res.json()) as { data?: HomePageContent };
+        if (!cancelled && json?.data) setContact(json.data);
+      } catch {
+        // keep defaults
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const fetchCertificates = async () => {
@@ -86,9 +103,9 @@ export default function CertificatesDetailsPage() {
             asChild
             className="bg-green-600 hover:bg-green-700 text-white"
           >
-            <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
+            <a href={buildWhatsAppLink(contact.contactWhatsappNumber)} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="h-4 w-4 ml-2" />
-              {whatsappNumber}
+              {contact.contactWhatsappNumber}
             </a>
           </Button>
         </CardContent>

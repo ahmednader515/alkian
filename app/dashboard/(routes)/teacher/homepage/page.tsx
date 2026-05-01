@@ -90,6 +90,7 @@ export default function TeacherHomePageSettingsPage() {
             <TabsTrigger value="media" className="shrink-0">الشعار والصور</TabsTrigger>
             <TabsTrigger value="dashboard" className="shrink-0">بانر الداشبورد</TabsTrigger>
             <TabsTrigger value="dash-big" className="shrink-0">أزرار الداشبورد الكبيرة</TabsTrigger>
+          <TabsTrigger value="contact" className="shrink-0">بيانات التواصل</TabsTrigger>
             <TabsTrigger value="hero" className="shrink-0">قسم منطقة البداية</TabsTrigger>
             <TabsTrigger value="sections" className="shrink-0">عناوين الأقسام</TabsTrigger>
             <TabsTrigger value="sessions" className="shrink-0">جلسات الحجز</TabsTrigger>
@@ -291,6 +292,37 @@ export default function TeacherHomePageSettingsPage() {
                   </div>
                 </details>
               ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="contact" className="mt-4 space-y-4 w-full max-w-full min-w-0 overflow-x-hidden">
+          <Card>
+            <CardHeader>
+              <CardTitle>بيانات التواصل</CardTitle>
+              <CardDescription>تغيير رقم واتساب ورابط صفحة فيسبوك (يظهران في الفوتر والصفحة الرئيسية).</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 w-full max-w-full min-w-0">
+              <div className="space-y-2">
+                <Label>رقم واتساب</Label>
+                <Input
+                  dir="ltr"
+                  className="w-full max-w-full min-w-0"
+                  value={data.contactWhatsappNumber}
+                  onChange={(e) => setField("contactWhatsappNumber", e.target.value)}
+                  placeholder="01146450551"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>رابط صفحة فيسبوك</Label>
+                <Input
+                  dir="ltr"
+                  className="w-full max-w-full min-w-0"
+                  value={data.contactFacebookUrl}
+                  onChange={(e) => setField("contactFacebookUrl", e.target.value)}
+                  placeholder="https://facebook.com/yourpage"
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
